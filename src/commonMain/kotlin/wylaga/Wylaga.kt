@@ -39,7 +39,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
-        val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2) - 2, ship.y - 17.0, 4.0, 15.0, DirectionVector(0.0, -1.0), 6.0, onImpact, model::despawnProjectile), ship)}
+        val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2) - 2, ship.y - 17.0, 4.0, 15.0, DirectionVector(0.0, -1.0), 6.0, Entity.Orientation.NORTH, onImpact, model::despawnProjectile), ship)}
 
         val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)

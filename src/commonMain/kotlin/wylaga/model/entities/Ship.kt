@@ -3,9 +3,9 @@ package wylaga.model.entities
 import wylaga.model.systems.damage.Damagable
 import wylaga.model.systems.firing.Fireable
 
-class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, private val maxHealth: Double,
+class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, private val maxHealth: Double,
            private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit)
-    : Entity(x, y, width, height, velocity = velocity), Damagable, Fireable {
+    : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable {
 
     var wantsToFire = false
 

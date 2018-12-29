@@ -9,6 +9,7 @@ import wylaga.model.entities.Entity
 import wylaga.util.DirectionVector
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.composites.CompositeDisplayable
+import wylaga.view.display.displayables.decorators.RotatedDisplayable
 import wylaga.view.display.displayables.primitives.SolidRect
 import wylaga.view.display.tickables.CompositeTickable
 import kotlin.random.Random
@@ -21,7 +22,7 @@ class Sprite(private val entity: Entity,
              explosionRadius: Double,
              private var tickable: Tickable = NullTickable.instance) : Displayable, Tickable {
 
-    private val sprite = TranslatedDisplayable(entity.x, entity.y, displayable)
+    private val sprite = TranslatedDisplayable(entity.x, entity.y, RotatedDisplayable(displayable, entity.width / 2.0, entity.height / 2.0, entity.orientation.radians - Entity.Orientation.NORTH.radians))
     private val explosion = Explosion(entity.width / 2.0, entity.height / 2.0,explosionRadius, explosionParticles, explosionColor) {onExpire(this)}
 
     override fun display(p: Painter) = sprite.display(p)
