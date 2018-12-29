@@ -9,11 +9,11 @@ import wylaga.view.display.displayables.primitives.SolidRect
 import wylaga.view.display.tickables.Tickable
 import wylaga.view.View
 import wylaga.model.Model
-import wylaga.model.ShipMaker
+import wylaga.model.ShipFactory
 import wylaga.model.entities.Projectile
 import wylaga.model.entities.Ship
 import wylaga.util.DirectionVector
-import wylaga.view.SpriteMaker
+import wylaga.view.SpriteFactory
 import wylaga.view.display.image.Base64Encoding
 
 
@@ -31,17 +31,17 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         // Wire listeners:
         model.subscribeShipSpawn(view::spawnSprite)
-        model.subscribeProjectileSpawn(view::spawnSprite)
+        model.subscribeProjectileSpawn(view::spawnChildSprite)
 
         model.subscribeShipDespawn(view::explodeSprite)
         model.subscribeProjectileDespawn(view::explodeSprite)
 
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
-        val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2), ship.y - 10.0, 5.0, 5.0, DirectionVector(0.0, -1.0), 6.0, onImpact, model::despawnProjectile))}
+        val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2), ship.y - 10.0, 5.0, 5.0, DirectionVector(0.0, -1.0), 6.0, onImpact, model::despawnProjectile), ship)}
 
-        val shipFactory = ShipMaker(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire)
-        val spriteFactory = SpriteMaker(decodeBase64, view::despawnSprite)
+        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire)
+        val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
         val player = shipFactory.makePlayer()

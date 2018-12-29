@@ -11,7 +11,7 @@ import wylaga.view.display.tickables.SimpleTickable
 import wylaga.view.sprites.Sprite
 import kotlin.math.PI
 
-class SpriteMaker(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit) {
+class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit) {
     private val imageLoader = ImageLoader(decodeBase64)
 
     fun makeEnemy(enemy: Ship) : Sprite {
