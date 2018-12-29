@@ -2,6 +2,7 @@ package wylaga.model
 
 import wylaga.model.entities.Projectile
 import wylaga.model.entities.Ship
+import wylaga.model.systems.Engine
 import wylaga.model.systems.collision.CollisionEngine
 import wylaga.model.systems.expiration.Expirable
 import wylaga.model.systems.expiration.ExpirationEngine
@@ -33,7 +34,7 @@ class Model {
         collisionEngine.subscribeShipToProjectile(Projectile::impact)
     }
 
-    fun tick() = engines.forEach { it.tick() }
+    fun tick() = engines.forEach(Engine::tick)
 
     fun flagForExpiration(expirable: Expirable) = expirationEngine.add(expirable)
 

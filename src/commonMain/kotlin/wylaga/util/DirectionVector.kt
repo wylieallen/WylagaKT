@@ -29,4 +29,14 @@ class DirectionVector(dx: Double, dy: Double) {
         val WEST = DirectionVector(-1.0, 0.0)
         val NORTHWEST = DirectionVector(-1.0, -1.0)
     }
+
+    override fun equals(other: Any?): Boolean {
+        return if(other is DirectionVector) {
+            other.dx == dx && other.dy == dy
+        } else false
+    }
+
+    override fun hashCode(): Int {
+        return (dx + (17 * dy)).toInt()
+    }
 }

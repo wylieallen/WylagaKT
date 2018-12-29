@@ -1,5 +1,6 @@
 package wylaga.view
 
+import wylaga.model.entities.Entity
 import wylaga.model.entities.Ship
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.Displayable
@@ -15,14 +16,18 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     private val imageLoader = ImageLoader(decodeBase64)
 
     fun makeEnemy(enemy: Ship) : Sprite {
-        return Sprite(enemy, imageLoader.enemy, onExpire, Color(0xFF, 0x00, 0xFF), 70, 60.0)
+        return Sprite(enemy, imageLoader.enemy, onExpire, Color.MAGENTA, 70, 60.0)
     }
 
     fun makePlayer(player: Ship) : Sprite {
         val displayable2 = CompositeDisplayable()
-        displayable2.add(SolidRect(player.width, player.height, Color(0x00, 0xFF, 0x00)))
+        displayable2.add(SolidRect(player.width, player.height, Color.GREEN))
         val rotatedDisplayable = RotatedDisplayable(SolidRect(player.width, player.height, Color(0xFF, 0x00, 0x00, 0x7F)), player.width / 2, player.height / 2, PI / 4)
         displayable2.add(rotatedDisplayable)
-        return Sprite(player, displayable2, onExpire, Color(0xFF, 0x00, 0xFF), 70, 60.0, SimpleTickable{ rotatedDisplayable.rotate(0.04) })
+        return Sprite(player, displayable2, onExpire, Color.MAGENTA, 70, 60.0, SimpleTickable{ rotatedDisplayable.rotate(0.04) })
+    }
+
+    fun makeRedPlayerProjectile(projectile: Entity) : Sprite {
+        return Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)
     }
 }
