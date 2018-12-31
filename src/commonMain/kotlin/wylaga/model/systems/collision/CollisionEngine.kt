@@ -1,7 +1,7 @@
 package wylaga.model.systems.collision
 
 import wylaga.model.entities.Projectile
-import wylaga.model.entities.Ship
+import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
 
 class CollisionEngine : Engine {

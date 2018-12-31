@@ -20,7 +20,7 @@ abstract class Entity(override var x: Double, override var y: Double,
     override val maxY: Double
         get() = y + height
 
-    enum class Orientation(vector: DirectionVector) {
+    enum class Orientation(val vector: DirectionVector) {
         NORTH(DirectionVector.NORTH), SOUTH(DirectionVector.SOUTH);
 
         val radians = atan2(vector.dx, vector.dy)

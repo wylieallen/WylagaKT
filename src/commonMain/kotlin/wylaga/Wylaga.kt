@@ -10,9 +10,10 @@ import wylaga.view.display.tickables.Tickable
 import wylaga.view.View
 import wylaga.model.Model
 import wylaga.model.ShipFactory
-import wylaga.model.entities.Entity
 import wylaga.model.entities.Projectile
-import wylaga.model.entities.Ship
+import wylaga.model.entities.ships.Ship
+import wylaga.model.entities.weapons.SimpleWeapon
+import wylaga.model.entities.weapons.Weapon
 import wylaga.util.DirectionVector
 import wylaga.view.SpriteFactory
 import wylaga.view.display.image.Base64Encoding
@@ -39,7 +40,12 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
-        val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2) - 2, ship.y - 17.0, 4.0, 15.0, DirectionVector(0.0, -1.0), 6.0, Entity.Orientation.NORTH, onImpact, model::despawnProjectile), ship)}
+        val playerWeapon = SimpleWeapon(4.0, 15.0, 6.0, onImpact, model::despawnProjectile)
+        //val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2) - 2, ship.y - 17.0, 4.0, 15.0, ship.orientation.vector, 6.0, ship.orientation, onImpact, model::despawnProjectile), ship)}
+        val playerHardpointX = 23.0
+        val playerHardpointY = -17.0
+        val onFire = {ship: Ship -> playerWeapon.fire(ship, playerHardpointX, playerHardpointY).forEach{model.spawnProjectile(it, playerWeapon)}}
+
 
         val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
@@ -47,7 +53,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         // Initialize player and controller:
         val player = shipFactory.makePlayer()
         view.setSprite(player, spriteFactory.makePlayer(player))
-        view.setSpriteMaker(player, spriteFactory::makeRedPlayerProjectile)
+        view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnShip(player)
 
         this.controller = Controller(player)

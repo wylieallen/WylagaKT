@@ -1,6 +1,6 @@
 package wylaga.control
 
-import wylaga.model.entities.Ship
+import wylaga.model.entities.ships.Ship
 import wylaga.util.DirectionVector
 
 class ShipController(private val ship: Ship) {

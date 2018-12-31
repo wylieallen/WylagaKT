@@ -1,7 +1,7 @@
 package wylaga.view
 
 import wylaga.model.entities.Entity
-import wylaga.model.entities.Ship
+import wylaga.model.entities.ships.Ship
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable

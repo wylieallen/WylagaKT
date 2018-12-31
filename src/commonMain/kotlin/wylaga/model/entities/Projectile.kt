@@ -1,5 +1,6 @@
 package wylaga.model.entities
 
+import wylaga.model.entities.ships.Ship
 import wylaga.util.DirectionVector
 
 class Projectile(x: Double, y: Double, width: Double, height: Double, trajectory: DirectionVector, velocity: Double, orientation: Orientation,

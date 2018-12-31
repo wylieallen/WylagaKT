@@ -1,7 +1,7 @@
 package wylaga.model
 
 import wylaga.model.entities.Entity
-import wylaga.model.entities.Ship
+import wylaga.model.entities.ships.Ship
 
 class ShipFactory(private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit) {
     fun makeEnemy(x: Double = 256.0, y: Double = 256.0) : Ship {
