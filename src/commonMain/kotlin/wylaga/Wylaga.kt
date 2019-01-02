@@ -46,12 +46,11 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val playerHardpointY = -17.0
         val onFire = {ship: Ship -> playerWeapon.fire(ship, playerHardpointX, playerHardpointY).forEach{model.spawnProjectile(it, playerWeapon)}}
 
-
-        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire)
+        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire, spawnProjectile = model::spawnProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
-        val player = shipFactory.makePlayer()
+        val player = shipFactory.makeHardpointedPlayer(weapon = playerWeapon)
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnShip(player)
@@ -62,7 +61,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         this.release = controller.release
 
         // Enemy:
-        val enemy = shipFactory.makeEnemy()
+        val enemy = shipFactory.makeEnemy(weapon = playerWeapon)
         enemy.trajectory = DirectionVector.EAST
         view.setSprite(enemy, spriteFactory.makeEnemy(enemy))
         model.spawnShip(enemy)
