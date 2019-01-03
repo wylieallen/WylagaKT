@@ -7,9 +7,9 @@ class ShipController(private val ship: Ship) {
     var trajectory = DirectionVector(0.0, 0.0)
     var wantsToFire = false
 
-    fun tick() {
+    fun update() {
         ship.trajectory = trajectory
         ship.wantsToFire = wantsToFire
-        wantsToFire = false
+        wantsToFire = false // Todo: move semi-auto behavior from Controller to Model
     }
 }

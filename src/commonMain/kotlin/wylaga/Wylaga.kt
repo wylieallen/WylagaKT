@@ -13,7 +13,6 @@ import wylaga.model.ShipFactory
 import wylaga.model.entities.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.entities.weapons.SimpleWeapon
-import wylaga.model.entities.weapons.Weapon
 import wylaga.util.DirectionVector
 import wylaga.view.SpriteFactory
 import wylaga.view.display.image.Base64Encoding
@@ -24,8 +23,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     private val view = View()
     private val controller: Controller
 
-    val press: (Action) -> Unit
-    val release: (Action) -> Unit
+    fun press(action: Action) = controller.press(action)
+    fun release(action: Action) = controller.release(action)
 
     init {
         // Initialize display tree:
@@ -57,9 +56,6 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         this.controller = Controller(player)
 
-        this.press = controller.press
-        this.release = controller.release
-
         // Enemy:
         val enemy = shipFactory.makeEnemy(weapon = playerWeapon)
         enemy.trajectory = DirectionVector.EAST
@@ -72,6 +68,6 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     override fun tick() {
         model.tick()
         view.tick()
-        controller.tick()
+        controller.update()
     }
 }

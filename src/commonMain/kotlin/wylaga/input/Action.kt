@@ -1,4 +1,4 @@
-package wylaga.control
+package wylaga.input
 
 enum class Action {
     PRIMARY,

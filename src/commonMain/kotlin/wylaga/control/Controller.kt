@@ -1,23 +1,18 @@
 package wylaga.control
 
+import wylaga.input.Action
+import wylaga.input.ActionMapper
 import wylaga.model.entities.ships.Ship
 
 class Controller(controlled: Ship) {
     private val pressController = ActionMapper()
     private val releaseController = ActionMapper()
 
-    private val entityController = ShipController(controlled)
+    private val shipController = ShipController(controlled)
 
-    private val inputController = DpadController(entityController)
-
-    val press: (Action) -> Unit
-    val release: (Action) -> Unit
-
+    private val inputController = DpadParser(shipController)
 
     init {
-        press = pressController.execute
-        release = releaseController.execute
-
         pressController.bind(Action.UP) { inputController.upPressed = true }
         pressController.bind(Action.DOWN) { inputController.downPressed = true }
         pressController.bind(Action.LEFT) { inputController.leftPressed = true }
@@ -32,8 +27,7 @@ class Controller(controlled: Ship) {
         releaseController.bind(Action.PRIMARY) { inputController.firePressed = false }
     }
 
-    fun tick() {
-        inputController.tick()
-        entityController.tick()
-    }
+    fun press(action: Action) = pressController.execute(action)
+    fun release(action: Action) = pressController.execute(action)
+    fun update() = shipController.update()
 }
