@@ -8,13 +8,15 @@ import wylaga.model.systems.expiration.Expirable
 import wylaga.model.systems.expiration.ExpirationEngine
 import wylaga.model.systems.firing.FiringEngine
 import wylaga.model.systems.movement.MovementEngine
+import wylaga.model.systems.piloting.PilotingEngine
 
 class Model {
     private val collisionEngine = CollisionEngine()
     private val movementEngine = MovementEngine()
     private val firingEngine = FiringEngine()
     private val expirationEngine = ExpirationEngine()
-    private val engines = linkedSetOf(movementEngine, collisionEngine, firingEngine, expirationEngine)
+    private val pilotingEngine = PilotingEngine()
+    private val engines = linkedSetOf(pilotingEngine, movementEngine, collisionEngine, firingEngine, expirationEngine)
 
     private val shipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val shipDespawnListeners = mutableSetOf<(Ship) -> Unit>()
@@ -23,10 +25,10 @@ class Model {
     private val projectileDespawnListeners = mutableSetOf<(Projectile) -> Unit>()
 
     init {
-        subscribeShipSpawn { movementEngine.add(it); collisionEngine.add(it); firingEngine.add(it); }
-        subscribeShipDespawn { movementEngine.remove(it); collisionEngine.remove(it); firingEngine.remove(it); }
+        subscribeShipSpawn { movementEngine.add(it); collisionEngine.add(it); firingEngine.add(it); pilotingEngine.add(it); }
+        subscribeShipDespawn { movementEngine.remove(it); collisionEngine.remove(it); firingEngine.remove(it); pilotingEngine.add(it); }
 
-        subscribeProjectileSpawn { projectile: Projectile, _: Any -> movementEngine.add(projectile); collisionEngine.add(projectile); }
+        subscribeProjectileSpawn { projectile: Projectile, _ -> movementEngine.add(projectile); collisionEngine.add(projectile); }
         subscribeProjectileDespawn { movementEngine.remove(it); collisionEngine.remove(it); }
 
         collisionEngine.subscribeShipToShip { a: Ship, b: Ship -> a.damage(30.0); b.damage(30.0); }

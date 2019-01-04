@@ -4,7 +4,9 @@ import wylaga.model.entities.Projectile
 import wylaga.model.entities.ships.Ship
 
 class NullWeapon private constructor() : Weapon {
-    override fun fire(ship: Ship, hardpointX: Double, hardpointY: Double): Collection<Projectile> = setOf()
+    private val emptySet = setOf<Projectile>()
+
+    override fun fire(ship: Ship, hardpointX: Double, hardpointY: Double): Collection<Projectile> = emptySet
 
     companion object {
         val INSTANCE = NullWeapon()

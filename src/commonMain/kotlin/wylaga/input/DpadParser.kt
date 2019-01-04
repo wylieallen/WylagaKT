@@ -1,9 +1,9 @@
 package wylaga.input
 
-import wylaga.control.ShipController
+import wylaga.model.entities.pilots.Pilot
 import wylaga.util.DirectionVector
 
-class DpadParser(private val shipController: ShipController) {
+class DpadParser(private val pilot: Pilot) {
     var downPressed = false
         set(bool) {
             field = bool
@@ -31,7 +31,7 @@ class DpadParser(private val shipController: ShipController) {
     var firePressed = false
         set(bool) {
             field = bool
-            shipController.wantsToFire = bool
+            pilot.wantsToFire = bool
         }
 
     private fun updateTrajectory() {
@@ -47,6 +47,6 @@ class DpadParser(private val shipController: ShipController) {
             else -> -1.0
         }
 
-        shipController.trajectory = DirectionVector(dx, dy)
+        pilot.trajectory = DirectionVector(dx, dy)
     }
 }

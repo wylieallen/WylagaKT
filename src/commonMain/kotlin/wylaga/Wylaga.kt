@@ -1,6 +1,6 @@
 package wylaga
 
-import wylaga.control.Action
+import wylaga.input.Action
 import wylaga.control.Controller
 import wylaga.view.display.Color
 import wylaga.view.display.Painter
@@ -11,6 +11,7 @@ import wylaga.view.View
 import wylaga.model.Model
 import wylaga.model.ShipFactory
 import wylaga.model.entities.Projectile
+import wylaga.model.entities.pilots.Pilot
 import wylaga.model.entities.ships.Ship
 import wylaga.model.entities.weapons.SimpleWeapon
 import wylaga.util.DirectionVector
@@ -39,26 +40,25 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
-        val playerWeapon = SimpleWeapon(4.0, 15.0, 6.0, onImpact, model::despawnProjectile)
-        //val onFire = {ship: Ship -> model.spawnProjectile(Projectile(ship.x + (ship.width / 2) - 2, ship.y - 17.0, 4.0, 15.0, ship.orientation.vector, 6.0, ship.orientation, onImpact, model::despawnProjectile), ship)}
-        val playerHardpointX = 23.0
-        val playerHardpointY = -17.0
-        val onFire = {ship: Ship -> playerWeapon.fire(ship, playerHardpointX, playerHardpointY).forEach{model.spawnProjectile(it, playerWeapon)}}
 
-        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, onFire = onFire, spawnProjectile = model::spawnProjectile)
+        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, spawnProjectile = model::spawnProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
-        val player = shipFactory.makeHardpointedPlayer(weapon = playerWeapon)
+        val playerPilot = Pilot()
+        val playerWeapon = SimpleWeapon(4.0, 15.0, 6.0, onImpact, model::despawnProjectile)
+        val player = shipFactory.makeHardpointedPlayer(weapon = playerWeapon, pilot = playerPilot)
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnShip(player)
 
-        this.controller = Controller(player)
+        this.controller = Controller(playerPilot)
 
         // Enemy:
-        val enemy = shipFactory.makeEnemy(weapon = playerWeapon)
-        enemy.trajectory = DirectionVector.EAST
+        val enemyPilot = Pilot()
+        enemyPilot.trajectory = DirectionVector.EAST
+        enemyPilot.wantsToFire = true
+        val enemy = shipFactory.makeEnemy(weapon = playerWeapon, pilot = enemyPilot)
         view.setSprite(enemy, spriteFactory.makeEnemy(enemy))
         model.spawnShip(enemy)
     }
@@ -68,6 +68,5 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     override fun tick() {
         model.tick()
         view.tick()
-        controller.update()
     }
 }
