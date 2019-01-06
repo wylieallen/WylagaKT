@@ -2,6 +2,6 @@ package wylaga.model.entities.pilots
 
 import wylaga.model.entities.ships.Ship
 
-interface Pilot {
-    fun update(ship: Ship)
+class NullPilot : Pilot {
+    override fun update(ship: Ship) {}
 }

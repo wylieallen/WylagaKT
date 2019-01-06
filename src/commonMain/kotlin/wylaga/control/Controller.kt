@@ -1,14 +1,8 @@
 package wylaga.control
 
-import wylaga.input.Action
-import wylaga.input.CombatActionHandler
-import wylaga.input.DpadParser
-import wylaga.model.entities.pilots.Pilot
+import wylaga.external.Action
 
-class Controller(controlled: Pilot) {
-    private val inputController = DpadParser(controlled)
-    private val actionHandler = CombatActionHandler(inputController)
-
-    fun press(action: Action) = actionHandler.press(action)
-    fun release(action: Action) = actionHandler.release(action)
+interface Controller {
+    fun press(action: Action)
+    fun release(action: Action)
 }

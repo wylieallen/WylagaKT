@@ -1,4 +1,4 @@
-package wylaga.input
+package wylaga.external
 
 import wylaga.Wylaga
 

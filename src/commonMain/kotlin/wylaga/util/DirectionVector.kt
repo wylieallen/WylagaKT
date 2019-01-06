@@ -1,6 +1,7 @@
 package wylaga.util
 
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 class DirectionVector(dx: Double, dy: Double) {
     val dx: Double
@@ -28,6 +29,8 @@ class DirectionVector(dx: Double, dy: Double) {
         val SOUTHWEST = DirectionVector(-1.0, 1.0)
         val WEST = DirectionVector(-1.0, 0.0)
         val NORTHWEST = DirectionVector(-1.0, -1.0)
+
+        fun random() = DirectionVector(Random.nextDouble() * 2 - 1, Random.nextDouble() * 2 - 1)
     }
 
     override fun equals(other: Any?): Boolean {

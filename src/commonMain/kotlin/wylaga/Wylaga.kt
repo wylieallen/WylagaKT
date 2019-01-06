@@ -1,7 +1,8 @@
 package wylaga
 
-import wylaga.input.Action
+import wylaga.external.Action
 import wylaga.control.Controller
+import wylaga.control.ControllerFactory
 import wylaga.view.display.Color
 import wylaga.view.display.Painter
 import wylaga.view.display.displayables.Displayable
@@ -10,11 +11,11 @@ import wylaga.view.display.tickables.Tickable
 import wylaga.view.View
 import wylaga.model.Model
 import wylaga.model.ShipFactory
+import wylaga.model.WeaponFactory
 import wylaga.model.entities.Projectile
-import wylaga.model.entities.pilots.Pilot
+import wylaga.model.entities.pilots.ControlBufferPilot
+import wylaga.model.entities.pilots.RandomPilot
 import wylaga.model.entities.ships.Ship
-import wylaga.model.entities.weapons.SimpleWeapon
-import wylaga.util.DirectionVector
 import wylaga.view.SpriteFactory
 import wylaga.view.display.image.Base64Encoding
 
@@ -22,10 +23,7 @@ import wylaga.view.display.image.Base64Encoding
 class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Tickable {
     private val model = Model()
     private val view = View()
-    private val controller: Controller
-
-    fun press(action: Action) = controller.press(action)
-    fun release(action: Action) = controller.release(action)
+    private var controller: Controller
 
     init {
         // Initialize display tree:
@@ -41,27 +39,30 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
 
+        val weaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnProjectile)
         val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, spawnProjectile = model::spawnProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
-        val playerPilot = Pilot()
-        val playerWeapon = SimpleWeapon(4.0, 15.0, 6.0, onImpact, model::despawnProjectile)
+        val playerPilot = ControlBufferPilot()
+        val playerWeapon = weaponFactory.makePlayerWeapon()
         val player = shipFactory.makeHardpointedPlayer(weapon = playerWeapon, pilot = playerPilot)
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnShip(player)
 
-        this.controller = Controller(playerPilot)
+        val controllerFactory = ControllerFactory()
+        this.controller = controllerFactory.makeCombatController(playerPilot)
 
         // Enemy:
-        val enemyPilot = Pilot()
-        enemyPilot.trajectory = DirectionVector.EAST
-        enemyPilot.wantsToFire = true
+        val enemyPilot = RandomPilot(0.01, 0.01)
         val enemy = shipFactory.makeEnemy(weapon = playerWeapon, pilot = enemyPilot)
         view.setSprite(enemy, spriteFactory.makeEnemy(enemy))
         model.spawnShip(enemy)
     }
+
+    fun press(action: Action) = controller.press(action)
+    fun release(action: Action) = controller.release(action)
 
     override fun display(p: Painter) = view.display(p)
 

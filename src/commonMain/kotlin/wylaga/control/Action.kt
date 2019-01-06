@@ -1,4 +1,4 @@
-package wylaga.input
+package wylaga.external
 
 enum class Action {
     PRIMARY,

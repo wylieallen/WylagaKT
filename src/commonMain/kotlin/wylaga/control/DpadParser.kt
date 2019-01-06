@@ -1,9 +1,9 @@
-package wylaga.input
+package wylaga.external
 
-import wylaga.model.entities.pilots.Pilot
+import wylaga.model.entities.pilots.ControlBufferPilot
 import wylaga.util.DirectionVector
 
-class DpadParser(private val pilot: Pilot) {
+class DpadParser(private val pilot: ControlBufferPilot) {
     var downPressed = false
         set(bool) {
             field = bool

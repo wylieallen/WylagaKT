@@ -67,6 +67,6 @@ class View : Displayable, Tickable {
     fun setSprite(entity: Entity, sprite: Sprite) = entityToSpriteMap.set(entity, sprite)
     fun unloadSprite(entity: Entity) = entityToSpriteMap.remove(entity)
 
-    private fun makeDefaultSprite(entity: Entity): Sprite { return Sprite(entity, SolidRect(entity.width, entity.height, Color.CYAN),
-            this::despawnSprite, Color.CYAN, 70, 75.0) }
+    private fun makeDefaultSprite(entity: Entity) = Sprite(entity, SolidRect(entity.width, entity.height, Color.CYAN),
+            this::despawnSprite, Color.CYAN, 70, 75.0)
 }
