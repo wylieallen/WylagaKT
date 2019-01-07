@@ -14,8 +14,9 @@ import wylaga.model.ShipFactory
 import wylaga.model.WeaponFactory
 import wylaga.model.entities.Projectile
 import wylaga.model.entities.pilots.ControlBufferPilot
-import wylaga.model.entities.pilots.RandomPilot
 import wylaga.model.entities.ships.Ship
+import wylaga.stages.StageFactory
+import wylaga.stages.StageIterator
 import wylaga.view.SpriteFactory
 import wylaga.view.display.image.Base64Encoding
 
@@ -24,6 +25,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     private val model = Model()
     private val view = View()
     private var controller: Controller
+
+    private val stageIterator: StageIterator
 
     init {
         // Initialize display tree:
@@ -54,11 +57,20 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val controllerFactory = ControllerFactory()
         this.controller = controllerFactory.makeCombatController(playerPilot)
 
-        // Enemy:
-        val enemyPilot = RandomPilot(0.01, 0.01)
-        val enemy = shipFactory.makeEnemy(weapon = playerWeapon, pilot = enemyPilot)
-        view.setSprite(enemy, spriteFactory.makeEnemy(enemy))
-        model.spawnShip(enemy)
+        val stageFactory = StageFactory(weaponFactory, shipFactory, spriteFactory)
+        stageIterator = StageIterator(stageFactory, this::loadAndStartNextStage)
+
+        loadAndStartNextStage()
+    }
+
+    private fun loadAndStartNextStage() {
+        if(stageIterator.hasNext()) {
+            val stage = stageIterator.next()
+            stage.load(view)
+            stage.start(model)
+        } else {
+            println("Game complete!")
+        }
     }
 
     fun press(action: Action) = controller.press(action)

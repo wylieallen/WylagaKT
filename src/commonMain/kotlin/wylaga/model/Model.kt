@@ -47,6 +47,7 @@ class Model {
 
     fun subscribeShipSpawn(callback: (Ship) -> Unit) = shipSpawnListeners.add(callback)
     fun subscribeShipDespawn(callback: (Ship) -> Unit) = shipDespawnListeners.add(callback)
+    fun unsubscribeShipDespawn(callback: (Ship) -> Unit) = shipDespawnListeners.remove(callback)
 
     fun subscribeProjectileSpawn(callback: (Projectile, Any) -> Unit) = projectileSpawnListeners.add(callback)
     fun subscribeProjectileDespawn(callback: (Projectile) -> Unit) = projectileDespawnListeners.add(callback)

@@ -9,4 +9,8 @@ class WeaponFactory(private val onImpact: (Projectile, Ship) -> Unit, private va
     fun makePlayerWeapon() : Weapon {
         return SimpleWeapon(4.0, 15.0, 6.0, onImpact, onProjectileDespawn)
     }
+
+    fun makeEnemyWeapon() : Weapon {
+        return SimpleWeapon(7.0, 7.0, 9.0, onImpact, onProjectileDespawn)
+    }
 }
