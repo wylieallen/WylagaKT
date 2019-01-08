@@ -23,7 +23,7 @@ class Sprite(private val entity: Entity,
              private var tickable: Tickable = NullTickable.instance) : Displayable, Tickable {
 
     private val sprite = TranslatedDisplayable(entity.x, entity.y, RotatedDisplayable(displayable, entity.width / 2.0, entity.height / 2.0, entity.orientation.radians - Entity.Orientation.NORTH.radians))
-    private val explosion = Explosion(entity.width / 2.0, entity.height / 2.0,explosionRadius, explosionParticles, explosionColor) {onExpire(this)}
+    private val explosion = Explosion(entity.width / 2.0, entity.height / 2.0, explosionRadius, explosionParticles, explosionColor) {onExpire(this)}
 
     override fun display(p: Painter) = sprite.display(p)
 
@@ -68,7 +68,7 @@ class Sprite(private val entity: Entity,
         }
 
         private class Particle(x: Double, y: Double, private val dx: Double, private val dy: Double, private var lifetime: Int, color: Color, private val onExpire: (Particle) -> Unit) : Displayable, Tickable {
-            private val displayable = TranslatedDisplayable(x, y, SolidRect(1.0, 1.0, color))
+            private val displayable = TranslatedDisplayable(x, y, SolidRect(2.0, 2.0, color))
 
             override fun display(p: Painter) = displayable.display(p)
 

@@ -17,17 +17,17 @@ class SimpleStage(private val spritePairs: Set<Pair<Ship, Sprite>>, private val 
     }
 
     override fun start(model: Model) {
-        spritePairs.forEach { model.spawnShip(it.first) }
+        spritePairs.forEach { model.spawnHostileShip(it.first) }
         shipsLeft = spritePairs.size
 
         val prevOnStageComplete = onStageComplete
 
         onStageComplete = {
             prevOnStageComplete()
-            model.unsubscribeShipDespawn(this::onShipDespawn)
+            model.unsubscribeHostileShipDespawn(this::onShipDespawn)
         }
 
-        model.subscribeShipDespawn(this::onShipDespawn)
+        model.subscribeHostileShipDespawn(this::onShipDespawn)
     }
 
     private fun onShipDespawn(ship: Ship) {

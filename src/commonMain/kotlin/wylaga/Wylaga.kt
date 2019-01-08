@@ -35,33 +35,39 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToBackground(SolidRect(1600.0, 900.0, Color.BLACK))
 
         // Wire listeners:
-        model.subscribeShipSpawn(view::spawnSprite)
-        model.subscribeProjectileSpawn(view::spawnChildSprite)
+        model.subscribeFriendlyShipSpawn(view::spawnSprite)
+        model.subscribeHostileShipSpawn(view::spawnSprite)
+        model.subscribeFriendlyProjectileSpawn(view::spawnChildSprite)
+        model.subscribeHostileProjectileSpawn(view::spawnChildSprite)
 
-        model.subscribeShipDespawn(view::explodeSprite)
-        model.subscribeProjectileDespawn(view::explodeSprite)
+        model.subscribeFriendlyShipDespawn(view::explodeSprite)
+        model.subscribeFriendlyProjectileDespawn(view::explodeSprite)
+        model.subscribeHostileShipDespawn(view::explodeSprite)
+        model.subscribeHostileProjectileDespawn(view::explodeSprite)
 
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
 
-        val weaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnProjectile)
-        val shipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnShip, spawnProjectile = model::spawnProjectile)
+        val friendlyWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnFriendlyProjectile)
+        val friendlyShipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnFriendlyShip, spawnProjectile = model::spawnFriendlyProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()
-        val playerWeapon = weaponFactory.makePlayerWeapon()
-        val player = shipFactory.makeHardpointedPlayer(weapon = playerWeapon, pilot = playerPilot)
+        val playerWeapon = friendlyWeaponFactory.makePlayerWeapon()
+        val player = friendlyShipFactory.makeHardpointedPlayer(weapon = playerWeapon, pilot = playerPilot)
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
-        model.spawnShip(player)
+        model.spawnFriendlyShip(player)
 
         val controllerFactory = ControllerFactory()
         this.controller = controllerFactory.makeCombatController(playerPilot)
 
         view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.curHealth.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
 
-        val stageFactory = StageFactory(weaponFactory, shipFactory, spriteFactory)
+        val hostileWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnHostileProjectile)
+        val hostileShipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile)
+        val stageFactory = StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory)
         stageIterator = StageIterator(stageFactory, this::loadAndStartNextStage)
 
         loadAndStartNextStage()
