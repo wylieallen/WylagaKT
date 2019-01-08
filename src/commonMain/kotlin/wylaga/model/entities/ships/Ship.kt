@@ -6,7 +6,7 @@ import wylaga.model.systems.damage.Damagable
 import wylaga.model.systems.firing.Fireable
 import wylaga.model.systems.piloting.Pilotable
 
-open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, private val maxHealth: Double,
+open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double,
                 private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit, private val pilot: Pilot)
     : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable, Pilotable {
 

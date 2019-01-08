@@ -32,8 +32,10 @@ class WylagaTests {
 
         override fun rotate(theta: Double) {}
 
-        override fun setFillColor(color: Color) {}
+        override fun setColor(color: Color) {}
+        override fun setFont(typeface: String, size: Int) {}
 
         override fun fillRect(x: Double, y: Double, width: Double, height: Double) {}
+        override fun drawString(string: String) {}
     }
 }

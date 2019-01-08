@@ -18,6 +18,8 @@ import wylaga.model.entities.ships.Ship
 import wylaga.stages.StageFactory
 import wylaga.stages.StageIterator
 import wylaga.view.SpriteFactory
+import wylaga.view.display.displayables.decorators.TranslatedDisplayable
+import wylaga.view.display.displayables.primitives.StringDisplayable
 import wylaga.view.display.image.Base64Encoding
 
 
@@ -29,7 +31,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     private val stageIterator: StageIterator
 
     init {
-        // Initialize display tree:
+        // Initialize background:
         view.addToBackground(SolidRect(1600.0, 900.0, Color.BLACK))
 
         // Wire listeners:
@@ -56,6 +58,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val controllerFactory = ControllerFactory()
         this.controller = controllerFactory.makeCombatController(playerPilot)
+
+        view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.curHealth.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
 
         val stageFactory = StageFactory(weaponFactory, shipFactory, spriteFactory)
         stageIterator = StageIterator(stageFactory, this::loadAndStartNextStage)
