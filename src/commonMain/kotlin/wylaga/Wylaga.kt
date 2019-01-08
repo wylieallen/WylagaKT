@@ -63,7 +63,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val controllerFactory = ControllerFactory()
         this.controller = controllerFactory.makeCombatController(playerPilot)
 
-        view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.curHealth.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
+        view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.health.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
+        view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
 
         val hostileWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnHostileProjectile)
         val hostileShipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile)

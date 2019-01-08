@@ -20,6 +20,8 @@ class KeyboardAdapter(private val wylaga: Wylaga) {
         // Action keys:
         bindKeyToAction(13, Action.PRIMARY) // todo: Enter isn't always keycode 13 on all platforms!!!
         bindKeyToAction(32, Action.PRIMARY)
+
+        bindKeyToAction(16, Action.SECONDARY)
     }
 
     private fun bindKeyToAction(keyCode: Int, action: Action) {

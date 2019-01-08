@@ -34,6 +34,12 @@ class DpadParser(private val pilot: ControlBufferPilot) {
             pilot.wantsToFire = bool
         }
 
+    var specialPressed = false
+        set(bool) {
+            field = bool
+            pilot.wantsToBoost = bool
+        }
+
     private fun updateTrajectory() {
         val dx = when {
             leftPressed == rightPressed -> 0.0

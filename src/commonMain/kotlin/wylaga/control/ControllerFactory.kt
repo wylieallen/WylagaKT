@@ -22,6 +22,9 @@ class ControllerFactory {
         controller.setPress(Action.PRIMARY) { dpad.firePressed = true }
         controller.setRelease(Action.PRIMARY) { dpad.firePressed = false }
 
+        controller.setPress(Action.SECONDARY) { dpad.specialPressed = true }
+        controller.setRelease(Action.SECONDARY) { dpad.specialPressed = false }
+
         return controller
     }
 

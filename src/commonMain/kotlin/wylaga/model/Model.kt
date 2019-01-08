@@ -3,6 +3,7 @@ package wylaga.model
 import wylaga.model.entities.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
+import wylaga.model.systems.boosting.BoostingEngine
 import wylaga.model.systems.collision.CollisionEngine
 import wylaga.model.systems.expiration.Expirable
 import wylaga.model.systems.expiration.ExpirationEngine
@@ -16,7 +17,8 @@ class Model {
     private val firingEngine = FiringEngine()
     private val expirationEngine = ExpirationEngine()
     private val pilotingEngine = PilotingEngine()
-    private val engines = linkedSetOf(pilotingEngine, movementEngine, collisionEngine, firingEngine, expirationEngine)
+    private val boostingEngine = BoostingEngine()
+    private val engines = linkedSetOf(pilotingEngine, boostingEngine, movementEngine, collisionEngine, firingEngine, expirationEngine)
 
     private val friendlyShipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val hostileShipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
@@ -31,11 +33,11 @@ class Model {
     private val hostileProjectileDespawnListeners = mutableSetOf<(Projectile) -> Unit>()
 
     init {
-        subscribeFriendlyShipSpawn { movementEngine.add(it); collisionEngine.addFriendly(it); firingEngine.add(it); pilotingEngine.add(it); }
-        subscribeFriendlyShipDespawn { movementEngine.remove(it); collisionEngine.removeFriendly(it); firingEngine.remove(it); pilotingEngine.remove(it); }
+        subscribeFriendlyShipSpawn { movementEngine.add(it); collisionEngine.addFriendly(it); firingEngine.add(it); pilotingEngine.add(it); boostingEngine.add(it);  }
+        subscribeFriendlyShipDespawn { movementEngine.remove(it); collisionEngine.removeFriendly(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
 
-        subscribeHostileShipSpawn { movementEngine.add(it); collisionEngine.addHostile(it); firingEngine.add(it); pilotingEngine.add(it); }
-        subscribeHostileShipDespawn { movementEngine.remove(it); collisionEngine.removeHostile(it); firingEngine.remove(it); pilotingEngine.remove(it); }
+        subscribeHostileShipSpawn { movementEngine.add(it); collisionEngine.addHostile(it); firingEngine.add(it); pilotingEngine.add(it); boostingEngine.add(it); }
+        subscribeHostileShipDespawn { movementEngine.remove(it); collisionEngine.removeHostile(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
 
         subscribeFriendlyProjectileSpawn { projectile: Projectile, _ -> movementEngine.add(projectile); collisionEngine.addFriendly(projectile); }
         subscribeFriendlyProjectileDespawn { movementEngine.remove(it); collisionEngine.removeFriendly(it); }
