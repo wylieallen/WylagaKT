@@ -4,7 +4,7 @@ import wylaga.model.entities.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
 
-class CollisionEngine : Engine {
+class CollisionEngine(private val minY: Double = -100.0, private val maxY: Double = 1000.0) : Engine {
     private val friendlyShips = mutableSetOf<Ship>()
     private val friendlyProjectiles = mutableSetOf<Projectile>()
     private val hostileShips = mutableSetOf<Ship>()
@@ -31,12 +31,12 @@ class CollisionEngine : Engine {
         for(friendly in friendlyShips) {
             for(projectile in hostileProjectiles) {
                 if(entitiesCollide(friendly, projectile)) {
-                    onFriendlyShipHit(projectile, friendly)
+                    friendlyShipToProjectileListeners.forEach{ it(projectile, friendly) }
                 }
             }
             for(hostile in hostileShips) {
                 if(entitiesCollide(friendly, hostile)) {
-                    onCollision(friendly, hostile)
+                    shipToShipListeners.forEach { it(friendly, hostile) }
                 }
             }
         }
@@ -44,23 +44,31 @@ class CollisionEngine : Engine {
         for(hostile in hostileShips) {
             for(projectile in friendlyProjectiles) {
                 if(entitiesCollide(projectile, hostile)) {
-                    onHostileShipHit(projectile, hostile)
+                    hostileShipToProjectileListeners.forEach{ it(projectile, hostile) }
                 }
+            }
+        }
+
+        for(projectile in friendlyProjectiles) {
+            if(projectile.y < minY || projectile.y > maxY) {
+                projectile.disable()
+            }
+        }
+
+        for(projectile in hostileProjectiles) {
+            if(projectile.y < minY || projectile.y > maxY) {
+                projectile.disable()
             }
         }
     }
 
-    fun entitiesCollide(a: Collidable, b: Collidable) : Boolean {
+    private fun entitiesCollide(a: Collidable, b: Collidable) : Boolean {
         if(a == b) return false
 
         return if((a.minY > b.maxY) || (b.minY > a.maxY)) {
             false
         } else !((a.minX > b.maxX) || (b.minX > a.maxX))
     }
-
-    fun onCollision(a: Ship, b: Ship) = shipToShipListeners.forEach { it(a, b) }
-    fun onFriendlyShipHit(a: Projectile, b: Ship) = friendlyShipToProjectileListeners.forEach{ it(a, b) }
-    fun onHostileShipHit(a: Projectile, b: Ship) = hostileShipToProjectileListeners.forEach{ it(a, b) }
 
     fun subscribeHostileShipToProjectile(listener: (Projectile, Ship) -> Unit) = hostileShipToProjectileListeners.add(listener)
     fun subscribeFriendlyShipToProjectile(listener: (Projectile, Ship) -> Unit) = friendlyShipToProjectileListeners.add(listener)

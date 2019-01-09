@@ -48,7 +48,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val onDeath = model::flagForExpiration
         val onImpact = {projectile: Projectile, ship: Ship -> ship.damage(10.0); onDeath(projectile); }
 
-        val friendlyWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnFriendlyProjectile)
+        val friendlyWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnFriendlyProjectile, onProjectileDisable = onDeath)
         val friendlyShipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnFriendlyShip, spawnProjectile = model::spawnFriendlyProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
@@ -66,7 +66,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.health.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
         view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
 
-        val hostileWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnHostileProjectile)
+        val hostileWeaponFactory = WeaponFactory(onImpact = onImpact, onProjectileDespawn = model::despawnHostileProjectile, onProjectileDisable = onDeath)
         val hostileShipFactory = ShipFactory(onDeath = onDeath, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile)
         val stageFactory = StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory)
         stageIterator = StageIterator(stageFactory, this::loadAndStartNextStage)
