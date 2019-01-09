@@ -41,6 +41,7 @@ class View : Displayable, Tickable {
         tickables.remove(sprite)
     }
 
+    fun addTickable(tickable: Tickable) = tickables.add(tickable)
     fun addToBackground(displayable: Displayable) = background.add(displayable)
     fun addToHud(displayable: Displayable) = hud.add(displayable)
 

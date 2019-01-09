@@ -18,10 +18,13 @@ import wylaga.model.entities.ships.Ship
 import wylaga.stages.StageFactory
 import wylaga.stages.StageIterator
 import wylaga.view.SpriteFactory
+import wylaga.view.backgrounds.Starfield
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.displayables.primitives.StringDisplayable
 import wylaga.view.display.image.Base64Encoding
 
+const val WIDTH = 1600
+const val HEIGHT = 900
 
 class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Tickable {
     private val model = Model()
@@ -32,7 +35,11 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
     init {
         // Initialize background:
-        view.addToBackground(SolidRect(1600.0, 900.0, Color.BLACK))
+        //view.addToBackground(SolidRect(1600.0, 900.0, Color.BLACK))
+        val starfield = Starfield(WIDTH.toDouble(), HEIGHT.toDouble(), 2000)
+        view.addToBackground(starfield)
+        view.addTickable(starfield)
+
 
         // Wire listeners:
         model.subscribeFriendlyShipSpawn(view::spawnSprite)
@@ -55,7 +62,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()
         val playerWeapon = friendlyWeaponFactory.makePlayerWeapon()
-        val player = friendlyShipFactory.makeHardpointedPlayer(weapon = playerWeapon, pilot = playerPilot)
+        val player = friendlyShipFactory.makeHardpointedPlayer((WIDTH / 2.0) - (25.0), (3.0 * HEIGHT / 4.0), weapon = playerWeapon, pilot = playerPilot)
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnFriendlyShip(player)

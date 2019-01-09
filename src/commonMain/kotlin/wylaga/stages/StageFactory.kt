@@ -9,7 +9,7 @@ class StageFactory(private val weaponFactory: WeaponFactory, private val shipFac
     fun nextStage(onStageComplete: () -> Unit) : Stage {
         val pilot = RandomPilot(0.01, 0.02, 0.1)
         val weapon = weaponFactory.makeEnemyWeapon()
-        val enemy = shipFactory.makeEnemy(weapon = weapon, pilot = pilot)
+        val enemy = shipFactory.makeEnemy(800.0 - 25.0, 125.0, weapon = weapon, pilot = pilot)
         val spritePairs = mutableSetOf(Pair(enemy, spriteFactory.makeEnemy(enemy)))
         val weaponPairs = mutableSetOf(Pair(weapon, spriteFactory::makeGreenSquareProjectile))
 
