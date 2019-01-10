@@ -15,8 +15,11 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
     override var trajectory: DirectionVector
         get() = super.trajectory
         set(value) {
+            val prevSign = getSign(super.trajectory.dy)
+            val nextSign = getSign(value.dy)
             super.trajectory = value
-            trajectoryListeners.forEach { it(this) }
+            if(prevSign != nextSign)
+                trajectoryListeners.forEach { it(this) }
         }
 
     val baseVelocity = velocity
@@ -84,4 +87,16 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
     override fun expire() = onExpire(this)
     override fun fire() = if(wantsToFire) { onFire(this); fireListeners.forEach{ it(this) } } else {}
     override fun pilot() { pilot.update(this) }
+
+    private fun getSign(delta: Double): Sign {
+        return when {
+            delta < 0 -> Sign.NEGATIVE
+            delta > 0 -> Sign.POSITIVE
+            else -> Sign.ZERO
+        }
+    }
+
+    private enum class Sign {
+        NEGATIVE, ZERO, POSITIVE
+    }
 }

@@ -49,11 +49,13 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
             when {
                 dy < 0 -> {
                     tickable.delegate = boostTickable
+                    boostTickable.skipAhead()
                 }
                 dy > 0 -> {
                     tickable.delegate = brakeTickable
                 }
                 else -> {
+                    baseTickable.skipAhead()
                     tickable.delegate = baseTickable
                 }
             }

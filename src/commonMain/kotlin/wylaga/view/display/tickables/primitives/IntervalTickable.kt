@@ -11,4 +11,8 @@ class IntervalTickable(private val interval: Int, private val onInterval: () -> 
             onInterval()
         } else --counter
     }
+
+    fun skipAhead() {
+        counter = 0
+    }
 }

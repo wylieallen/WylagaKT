@@ -19,6 +19,7 @@ class KeyboardAdapter(private val wylaga: Wylaga) {
 
         // Action keys:
         bindKeyToAction(13, Action.PRIMARY) // todo: Enter isn't always keycode 13 on all platforms!!!
+        bindKeyToAction(10, Action.PRIMARY) // ...for example, it's 10 on JVM (JS doesn't use 10 at all?)
         bindKeyToAction(32, Action.PRIMARY)
 
         bindKeyToAction(16, Action.SECONDARY)
