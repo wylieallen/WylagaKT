@@ -20,8 +20,28 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makePlayer(player: Ship) : Sprite {
         val chassis = makePlayerChassis(player)
         val special = makePlayerSpecial(player)
+        val weapon = makePlayerWeapon(player)
 
-        return Sprite(player, CompositeDisplayable(chassis.first, special.first), onExpire, Color.MAGENTA, 70, 60.0, CompositeTickable(chassis.second, special.second))
+        return Sprite(player, CompositeDisplayable(chassis.first, special.first, weapon.first), onExpire, Color.MAGENTA, 70, 60.0,
+            CompositeTickable(chassis.second, special.second, weapon.second))
+    }
+
+    private fun makePlayerWeapon(player: Ship) : Pair<Displayable, Tickable> {
+        val baseWeapon = imageLoader.playerBaseWeapon
+        val firingWeapon = imageLoader.playerFiringWeapon
+
+        val weapon = TranslatedDisplayable(22.0, 0.0, baseWeapon)
+        val tickable = DelegateTickable()
+
+        player.subscribeFire {
+            weapon.target = firingWeapon
+            tickable.delegate = CountdownTickable(3) {
+                weapon.target = baseWeapon
+                tickable.delegate = NullTickable.instance
+            }
+        }
+
+        return Pair(weapon, tickable)
     }
 
     private fun makePlayerSpecial(player: Ship) : Pair<Displayable, Tickable> {

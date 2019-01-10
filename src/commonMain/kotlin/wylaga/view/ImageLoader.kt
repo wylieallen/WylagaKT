@@ -17,5 +17,8 @@ class ImageLoader(decode: (Base64Encoding) -> Displayable) {
     val playerBaseSpecial = decode(PNG("iVBORw0KGgoAAAANSUhEUgAAACQAAAAECAYAAADmrJ2uAAAAOklEQVQoU2NkQAKGhob/kfnnz59nROZTi43PHriF6IpgllPbUYTsATsIlyJqO4oYexgJKaKWo4i1BwCsKx2XCVZoUgAAAABJRU5ErkJgggAA"))
     val playerBoostSpecial = decode(PNG("iVBORw0KGgoAAAANSUhEUgAAACQAAAAECAYAAADmrJ2uAAAAS0lEQVQoU2NkQAKGhob/z59bAxYxNAphOH/+PCOyPLXY+OyBWwhTBHIICIAcRgtHEbIH7CBkRSghRGVHEWMPI3Lw4YoSaoQUsfYAALVdR5fmYNrmAAAAAElFTkSuQmCC"))
 
+    val playerBaseWeapon = decode(PNG("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAH0lEQVQYV2NkwAEYyZdYvHjxf5Du2NhYsClwo4iWAADCcgwHip7LSgAAAABJRU5ErkJgggAA"))
+    val playerFiringWeapon = decode(PNG("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAN0lEQVQYV32NyQ0AIAzDnEE7XQcFpVIQH3g1zSFrwRLIFyBafmJaJzzNmFf4WTwZnnf3wKtquBuM1BYBeezCIQAAAABJRU5ErkJgggAA"))
+
     private class PNG(data: String): Base64Encoding("data:image/png;base64,", data)
 }
