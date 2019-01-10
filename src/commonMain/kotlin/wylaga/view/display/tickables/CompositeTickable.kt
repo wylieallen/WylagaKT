@@ -1,7 +1,7 @@
 package wylaga.view.display.tickables
 
-class CompositeTickable : Tickable {
-    private val children = mutableSetOf<Tickable>()
+class CompositeTickable(vararg children: Tickable) : Tickable {
+    private val children = mutableSetOf(*children)
 
     fun add(t: Tickable) = children.add(t)
     fun remove(t: Tickable) = children.remove(t)

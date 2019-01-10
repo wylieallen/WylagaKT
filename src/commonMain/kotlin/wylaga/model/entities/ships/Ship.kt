@@ -54,10 +54,18 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
         }
     }
 
-    override fun damage(damage: Double) { health -= damage }
-    override fun heal(healing: Double) { health += healing }
+    private val damageListeners = mutableSetOf<(Ship) -> Unit>()
+    private val healListeners = mutableSetOf<(Ship) -> Unit>()
+    private val fireListeners = mutableSetOf<(Ship) -> Unit>()
+
+    fun subscribeDamage(callback: (Ship) -> Unit) = damageListeners.add(callback)
+    fun subscribeHeal(callback: (Ship) -> Unit) = healListeners.add(callback)
+    fun subscribeFire(callback: (Ship) -> Unit) = fireListeners.add(callback)
+
+    override fun damage(damage: Double) { health -= damage; damageListeners.forEach{ it(this) } }
+    override fun heal(healing: Double) { health += healing; healListeners.forEach{ it(this) } }
 
     override fun expire() = onExpire(this)
-    override fun fire() = if(wantsToFire) onFire(this) else {}
+    override fun fire() = if(wantsToFire) { onFire(this); fireListeners.forEach{ it(this) } } else {}
     override fun pilot() { pilot.update(this) }
 }

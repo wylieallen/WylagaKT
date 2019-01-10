@@ -18,7 +18,8 @@ class Starfield(width: Double, private val height: Double, starCount: Int) : Dis
         displayRoot.add(SolidRect(width, height, Color.BLACK))
 
         for(i in 1..starCount) {
-            val star = Star(Random.nextDouble() * width, Random.nextDouble() * height, Random.nextDouble() * 3 + 0.2, 1.0, Color(Random.nextInt(0xFF), Random.nextInt(0xFF), Random.nextInt(0xFF)))
+            val star = Star(Random.nextDouble() * width, Random.nextDouble() * height, Random.nextDouble() * 3 + 0.2, 1.0,
+                Color(Random.nextInt(0xFF), Random.nextInt(0xFF), Random.nextInt(0xFF)))
             displayRoot.add(star)
             tickRoot.add(star)
         }
