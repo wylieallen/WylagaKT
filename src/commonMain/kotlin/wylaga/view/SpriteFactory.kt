@@ -7,10 +7,7 @@ import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.image.Base64Encoding
-import wylaga.view.display.tickables.CompositeTickable
-import wylaga.view.display.tickables.CountdownTickable
-import wylaga.view.display.tickables.DelegateTickable
-import wylaga.view.display.tickables.NullTickable
+import wylaga.view.display.tickables.*
 import wylaga.view.sprites.Sprite
 
 class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit) {
@@ -21,12 +18,30 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     }
 
     fun makePlayer(player: Ship) : Sprite {
-//        val displayable2 = CompositeDisplayable()
-//        displayable2.add(SolidRect(player.width, player.height, Color.GREEN))
-//        val rotatedDisplayable = RotatedDisplayable(SolidRect(player.width, player.height, Color.RED.withAlpha(0x7F)), player.width / 2, player.height / 2, PI / 4)
-//        displayable2.add(rotatedDisplayable)
-//        return Sprite(player, displayable2, onExpire, Color.MAGENTA, 70, 60.0, SimpleTickable{ rotatedDisplayable.rotate(0.04) })
+        val chassis = makePlayerChassis(player)
+        val special = makePlayerSpecial(player)
 
+        return Sprite(player, CompositeDisplayable(chassis.first, special.first), onExpire, Color.MAGENTA, 70, 60.0, CompositeTickable(chassis.second, special.second))
+    }
+
+    private fun makePlayerSpecial(player: Ship) : Pair<Displayable, Tickable> {
+        val baseSpecial = imageLoader.playerBaseSpecial
+        val boostSpecial = imageLoader.playerBoostSpecial
+
+        val special = TranslatedDisplayable(7.0, 24.0, baseSpecial)
+
+        player.subscribeBoost {
+            special.target = if(player.wantsToBoost) {
+                boostSpecial
+            } else {
+                baseSpecial
+            }
+        }
+
+        return Pair(special, NullTickable.instance)
+    }
+
+    private fun makePlayerChassis(player: Ship) : Pair<Displayable, Tickable> {
         val baseChassis = imageLoader.playerBaseChassis
         val hurtChassis = imageLoader.playerHurtChassis
         val direChassis = imageLoader.playerDireChassis
@@ -52,7 +67,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
 //            }
 //        }
 
-        return Sprite(player, CompositeDisplayable(chassis), onExpire, Color.MAGENTA, 70, 60.0, CompositeTickable(chassisAnimation))
+        return Pair(chassis, chassisAnimation)
     }
 
     fun makeRedPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)
