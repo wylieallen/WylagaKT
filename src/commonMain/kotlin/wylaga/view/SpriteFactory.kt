@@ -18,6 +18,16 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Sprite(enemy, imageLoader.enemy, onExpire, Color.GREEN, 100, 80.0)
     }
 
+    fun makeBigEnemy(enemy: Ship) : Sprite {
+        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseChassis, imageLoader.bigEnemyHurtChassis, imageLoader.bigEnemyDireChassis)
+        val special = makeStandardShipSpecial(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseSpecial, imageLoader.bigEnemyBoostSpecial)
+        val weapon = makeStandardWeapon(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseWeapon, imageLoader.bigEnemyFiringWeapon)
+        val engine = makeStandardEngine(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseEngine1, imageLoader.bigEnemyBaseEngine2,
+            imageLoader.bigEnemyBrakeEngine, imageLoader.bigEnemyBoostEngine1, imageLoader.bigEnemyBoostEngine2)
+        return Sprite(enemy, CompositeDisplayable(chassis.first, special.first, weapon.first, engine.first), onExpire, Color.GREEN, 100, 80.0,
+            CompositeTickable(chassis.second, special.second, weapon.second, engine.second))
+    }
+
     fun makePlayer(player: Ship) : Sprite {
         val chassis = makePlayerChassis(player)
         val special = makePlayerSpecial(player)
@@ -29,22 +39,49 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     }
 
     private fun makePlayerEngine(player: Ship) : Pair<Displayable, Tickable> {
-        val baseEngine1 = imageLoader.playerBaseEngine1
-        val baseEngine2 = imageLoader.playerBaseEngine2
+        val base1 = imageLoader.playerBaseEngine1
+        val base2 = imageLoader.playerBaseEngine2
 
-        val brakeEngine = imageLoader.playerBrakeEngine
+        val brake = imageLoader.playerBrakeEngine
 
-        val boostEngine1 = imageLoader.playerBoostEngine1
-        val boostEngine2 = imageLoader.playerBoostEngine2
+        val boost1 = imageLoader.playerBoostEngine1
+        val boost2 = imageLoader.playerBoostEngine2
 
-        val engine = TranslatedDisplayable(12.0, 35.0, baseEngine1)
+        return makeStandardEngine(player, 12.0, 35.0, base1, base2, brake, boost1, boost2)
+    }
 
-        val baseTickable = IntervalTickable(40) { engine.target = if(engine.target === baseEngine1) baseEngine2 else baseEngine1 }
-        val brakeTickable = SimpleTickable { engine.target = brakeEngine }
-        val boostTickable = IntervalTickable(10) { engine.target = if(engine.target === boostEngine1) boostEngine2 else boostEngine1 }
+    private fun makePlayerWeapon(player: Ship) : Pair<Displayable, Tickable> {
+        val baseWeapon = imageLoader.playerBaseWeapon
+        val firingWeapon = imageLoader.playerFiringWeapon
+
+        return makeStandardWeapon(player, 22.0, 0.0, baseWeapon, firingWeapon)
+    }
+
+    private fun makePlayerSpecial(player: Ship) : Pair<Displayable, Tickable> {
+        val baseSpecial = imageLoader.playerBaseSpecial
+        val boostSpecial = imageLoader.playerBoostSpecial
+
+        return makeStandardShipSpecial(player, 7.0, 24.0, baseSpecial, boostSpecial)
+    }
+
+    private fun makePlayerChassis(player: Ship) : Pair<Displayable, Tickable> {
+        val baseChassis = imageLoader.playerBaseChassis
+        val hurtChassis = imageLoader.playerHurtChassis
+        val direChassis = imageLoader.playerDireChassis
+        val healChassis = imageLoader.playerHealChassis
+
+        return makeStandardShipChassis(player, 0.0, 0.0, baseChassis, hurtChassis, direChassis)
+    }
+
+    private fun makeStandardEngine(ship: Ship, x: Double, y: Double, base1: Displayable, base2: Displayable, brake: Displayable, boost1: Displayable, boost2: Displayable) : Pair<Displayable, Tickable> {
+        val engine = TranslatedDisplayable(x, y, base1)
+
+        val baseTickable = IntervalTickable(40) { engine.target = if(engine.target === base1) base2 else base1 }
+        val brakeTickable = SimpleTickable { engine.target = brake }
+        val boostTickable = IntervalTickable(10) { engine.target = if(engine.target === boost1) boost2 else boost1 }
         val tickable = DelegateTickable(baseTickable)
 
-        player.subscribeTrajectory {
+        ship.subscribeTrajectory {
             val dy = it.trajectory.dy
             when {
                 dy < 0 -> {
@@ -64,17 +101,14 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Pair(engine, tickable)
     }
 
-    private fun makePlayerWeapon(player: Ship) : Pair<Displayable, Tickable> {
-        val baseWeapon = imageLoader.playerBaseWeapon
-        val firingWeapon = imageLoader.playerFiringWeapon
-
-        val weapon = TranslatedDisplayable(22.0, 0.0, baseWeapon)
+    private fun makeStandardWeapon(ship: Ship, x: Double, y: Double, base: Displayable, firing: Displayable) : Pair<Displayable, Tickable> {
+        val weapon = TranslatedDisplayable(x, y, base)
         val tickable = DelegateTickable()
 
-        player.subscribeFire {
-            weapon.target = firingWeapon
+        ship.subscribeFire {
+            weapon.target = firing
             tickable.delegate = CountdownTickable(3) {
-                weapon.target = baseWeapon
+                weapon.target = base
                 tickable.delegate = NullTickable.instance
             }
         }
@@ -82,45 +116,37 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Pair(weapon, tickable)
     }
 
-    private fun makePlayerSpecial(player: Ship) : Pair<Displayable, Tickable> {
-        val baseSpecial = imageLoader.playerBaseSpecial
-        val boostSpecial = imageLoader.playerBoostSpecial
+    private fun makeStandardShipSpecial(ship: Ship, x: Double, y: Double, base: Displayable, boost: Displayable) : Pair<Displayable, Tickable> {
+        val special = TranslatedDisplayable(x, y, base)
 
-        val special = TranslatedDisplayable(7.0, 24.0, baseSpecial)
-
-        player.subscribeBoost {
+        ship.subscribeBoost {
             special.target = if(it.wantsToBoost) {
-                boostSpecial
+                boost
             } else {
-                baseSpecial
+                base
             }
         }
 
         return Pair(special, NullTickable.instance)
     }
 
-    private fun makePlayerChassis(player: Ship) : Pair<Displayable, Tickable> {
-        val baseChassis = imageLoader.playerBaseChassis
-        val hurtChassis = imageLoader.playerHurtChassis
-        val direChassis = imageLoader.playerDireChassis
-        val healChassis = imageLoader.playerHealChassis
-
-        val chassis = TranslatedDisplayable(0.0, 0.0, baseChassis)
+    private fun makeStandardShipChassis(ship: Ship, x: Double, y: Double, base: Displayable, hurt: Displayable, dire: Displayable) : Pair<Displayable, Tickable> {
+        val chassis = TranslatedDisplayable(x, y, base)
 
         val chassisAnimation = DelegateTickable()
 
-        player.subscribeDamage {
-            chassis.target = hurtChassis
+        ship.subscribeDamage {
+            chassis.target = hurt
             chassisAnimation.delegate = CountdownTickable(6) {
-                chassis.target = if(it.health <= 20) direChassis else baseChassis
+                chassis.target = if(it.health <= (it.maxHealth * 0.2)) dire else base
                 chassisAnimation.delegate = NullTickable.instance
             }
         }
 
-//        player.subscribeHeal {
-//            chassis.target = healChassis
+//        ship.subscribeHeal {
+//            chassis.target = heal
 //            chassisAnimation.delegate = CountdownTickable(6) {
-//                chassis.target = if(it.health <= 20) direChassis else baseChassis
+//                chassis.target = if(it.health <= (it.maxHealth * 0.2)) dire else base
 //                chassisAnimation.delegate = NullTickable.instance
 //            }
 //        }
