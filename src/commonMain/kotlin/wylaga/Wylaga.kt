@@ -36,7 +36,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     init {
         // Initialize background:
         //view.addToBackground(SolidRect(1600.0, 900.0, Color.BLACK))
-        val starfield = Starfield(WIDTH.toDouble(), HEIGHT.toDouble(), 2000)
+        val starfield = Starfield(WIDTH.toDouble(), HEIGHT.toDouble(), 200)
         view.addToBackground(starfield)
         view.addTickable(starfield)
 

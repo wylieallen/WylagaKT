@@ -81,22 +81,42 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         val boostTickable = IntervalTickable(10) { engine.target = if(engine.target === boost1) boost2 else boost1 }
         val tickable = DelegateTickable(baseTickable)
 
-        ship.subscribeTrajectory {
-            val dy = it.trajectory.dy
-            when {
-                dy < 0 -> {
-                    tickable.delegate = boostTickable
-                    boostTickable.skipAhead()
+        if(ship.orientation === Entity.Orientation.NORTH) {
+            ship.subscribeTrajectory {
+                val dy = it.trajectory.dy
+                when {
+                    dy < 0 -> {
+                        tickable.delegate = boostTickable
+                        boostTickable.skipAhead()
+                    }
+                    dy > 0 -> {
+                        tickable.delegate = brakeTickable
+                    }
+                    else -> {
+                        baseTickable.skipAhead()
+                        tickable.delegate = baseTickable
+                    }
                 }
-                dy > 0 -> {
-                    tickable.delegate = brakeTickable
-                }
-                else -> {
-                    baseTickable.skipAhead()
-                    tickable.delegate = baseTickable
+            }
+        } else if(ship.orientation === Entity.Orientation.SOUTH) {
+            ship.subscribeTrajectory {
+                val dy = it.trajectory.dy
+                when {
+                    dy > 0 -> {
+                        tickable.delegate = boostTickable
+                        boostTickable.skipAhead()
+                    }
+                    dy < 0 -> {
+                        tickable.delegate = brakeTickable
+                    }
+                    else -> {
+                        baseTickable.skipAhead()
+                        tickable.delegate = baseTickable
+                    }
                 }
             }
         }
+
 
         return Pair(engine, tickable)
     }
