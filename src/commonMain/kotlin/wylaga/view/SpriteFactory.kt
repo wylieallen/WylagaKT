@@ -15,7 +15,12 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     private val imageLoader = ImageLoader(decodeBase64)
 
     fun makeEnemy(enemy: Ship) : Sprite {
-        return Sprite(enemy, imageLoader.enemy, onExpire, Color.GREEN, 100, 80.0)
+        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.enemyBaseChassis, imageLoader.enemyHurtChassis, imageLoader.enemyDireChassis)
+        val special = makeStandardShipSpecial(enemy, 3.0, 13.0, imageLoader.enemyBaseSpecial, imageLoader.enemyBoostSpecial)
+        val weapon = makeStandardWeapon(enemy, 6.0, 1.0, imageLoader.enemyBaseWeapon, imageLoader.enemyFiringWeapon)
+        val engine = makeStandardEngine(enemy, 7.0, 22.0, imageLoader.enemyBaseEngine, imageLoader.enemyBoostEngine, imageLoader.enemyBaseEngine, imageLoader.enemyBoostEngine, imageLoader.enemyBoostEngine)
+        return Sprite(enemy, CompositeDisplayable(chassis.first, special.first, weapon.first, engine.first), onExpire, Color.GREEN, 100, 80.0,
+            CompositeTickable(chassis.second, special.second, weapon.second, engine.second))
     }
 
     fun makeBigEnemy(enemy: Ship) : Sprite {

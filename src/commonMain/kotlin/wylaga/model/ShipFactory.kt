@@ -10,11 +10,14 @@ import wylaga.model.entities.weapons.Weapon
 
 class ShipFactory(private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val spawnProjectile: (Projectile, Any) -> Unit) {
     fun makeEnemy(x: Double = 256.0, y: Double = 256.0, weapon: Weapon, pilot: Pilot) : Ship {
-//        return Ship(x, y, 50.0, 50.0,2.0, Entity.Orientation.SOUTH,100.0, onDeath, onExpire, onFire)
         return HardpointedShip(x, y, 50.0, 50.0, 1.0, Entity.Orientation.SOUTH, 100.0, onDeath, onExpire, spawnProjectile, pilot, HardpointedShip.Hardpoint(25.0, 2.0, weapon))
     }
 
     fun makeHardpointedPlayer(x: Double = 512.0, y: Double = 256.0, weapon: Weapon, pilot: Pilot) : HardpointedShip {
         return HardpointedShip(x, y, 50.0, 50.0, 2.0, Entity.Orientation.NORTH, 100.0, onDeath, onExpire, spawnProjectile, pilot, HardpointedShip.Hardpoint(25.0, 2.0, weapon))
+    }
+
+    fun makeSmallEnemy(x: Double, y: Double, weapon: Weapon, pilot: Pilot) : Ship {
+        return HardpointedShip(x, y, 25.0, 25.0, 2.0, Entity.Orientation.SOUTH, 100.0, onDeath, onExpire, spawnProjectile, pilot, HardpointedShip.Hardpoint(12.5, 2.0, weapon))
     }
 }

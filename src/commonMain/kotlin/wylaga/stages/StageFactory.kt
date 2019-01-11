@@ -10,8 +10,10 @@ class StageFactory(private val weaponFactory: WeaponFactory, private val shipFac
         val pilot = RandomPilot(0.01, 0.02, 0.01)
         val weapon = weaponFactory.makeEnemyWeapon()
         val enemy = shipFactory.makeEnemy(800.0 - 25.0, 125.0, weapon = weapon, pilot = pilot)
-        val spritePairs = mutableSetOf(Pair(enemy, spriteFactory.makeBigEnemy(enemy)))
-        val weaponPairs = mutableSetOf(Pair(weapon, spriteFactory::makeGreenSquareProjectile))
+        val smallWeapon = weaponFactory.makeEnemyWeapon()
+        val leftEnemy = shipFactory.makeSmallEnemy(800.0 - 25.0 - 50.0, 75.0, weapon = smallWeapon, pilot = pilot)
+        val spritePairs = mutableSetOf(Pair(enemy, spriteFactory.makeBigEnemy(enemy)), Pair(leftEnemy, spriteFactory.makeEnemy(leftEnemy)))
+        val weaponPairs = mutableSetOf(Pair(weapon, spriteFactory::makeGreenSquareProjectile), Pair(smallWeapon, spriteFactory::makeGreenSquareProjectile))
 
         return SimpleStage(spritePairs, weaponPairs, onStageComplete)
     }

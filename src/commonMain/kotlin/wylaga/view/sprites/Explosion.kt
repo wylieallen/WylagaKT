@@ -36,7 +36,7 @@ class Explosion(x: Double, y: Double, radius: Double, particleCount: Int, partic
         tickRoot.tick()
         expiredParticles.forEach { displayRoot.remove(it); tickRoot.remove(it); }
         expiredParticles.clear()
-        if(displayRoot.size() <= 0) {
+        if(displayRoot.size <= 0) {
             onExpire(this)
         }
     }
