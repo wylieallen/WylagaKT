@@ -21,9 +21,11 @@ class Model {
     private val boostingEngine = BoostingEngine()
     private val engines = linkedSetOf(pilotingEngine, boostingEngine, movementEngine, collisionEngine, firingEngine, expirationEngine)
 
+    private val playerShipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val friendlyShipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val hostileShipSpawnListeners = mutableSetOf<(Ship) -> Unit>()
 
+    private val playerShipDespawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val friendlyShipDespawnListeners = mutableSetOf<(Ship) -> Unit>()
     private val hostileShipDespawnListeners = mutableSetOf<(Ship) -> Unit>()
 
@@ -34,6 +36,9 @@ class Model {
     private val hostileProjectileDespawnListeners = mutableSetOf<(Projectile) -> Unit>()
 
     init {
+        subscribePlayerShipSpawn { movementEngine.add(it); collisionEngine.addPlayer(it); firingEngine.add(it); pilotingEngine.add(it); boostingEngine.add(it); }
+        subscribePlayerShipDespawn { movementEngine.remove(it); collisionEngine.removePlayer(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
+
         subscribeFriendlyShipSpawn { movementEngine.add(it); collisionEngine.addFriendly(it); firingEngine.add(it); pilotingEngine.add(it); boostingEngine.add(it);  }
         subscribeFriendlyShipDespawn { movementEngine.remove(it); collisionEngine.removeFriendly(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
 
@@ -55,9 +60,11 @@ class Model {
 
     fun flagForExpiration(expirable: Expirable) = expirationEngine.add(expirable)
 
+    fun spawnPlayerShip(ship: Ship) = playerShipSpawnListeners.forEach { it(ship) }
     fun spawnFriendlyShip(ship: Ship) = friendlyShipSpawnListeners.forEach { it(ship) }
-    fun spawnHostileShip(ship: Ship) = hostileShipSpawnListeners.forEach{ it(ship) }
+    fun spawnHostileShip(ship: Ship) = hostileShipSpawnListeners.forEach { it(ship) }
 
+    fun despawnPlayerShip(ship: Ship) = playerShipDespawnListeners.forEach { it(ship) }
     fun despawnFriendlyShip(ship: Ship) = friendlyShipDespawnListeners.forEach { it(ship) }
     fun despawnHostileShip(ship: Ship) = hostileShipDespawnListeners.forEach { it(ship) }
 
@@ -67,6 +74,8 @@ class Model {
     fun spawnHostileProjectile(projectile: Projectile, source: Any) = hostileProjectileSpawnListeners.forEach { it(projectile, source) }
     fun despawnHostileProjectile(projectile: Projectile) = hostileProjectileDespawnListeners.forEach { it(projectile) }
 
+    fun subscribePlayerShipSpawn(callback: (Ship) -> Unit) = playerShipSpawnListeners.add(callback)
+    fun subscribePlayerShipDespawn(callback: (Ship) -> Unit) = playerShipDespawnListeners.add(callback)
     fun subscribeFriendlyShipSpawn(callback: (Ship) -> Unit) = friendlyShipSpawnListeners.add(callback)
     fun subscribeFriendlyShipDespawn(callback: (Ship) -> Unit) = friendlyShipDespawnListeners.add(callback)
     fun unsubscribeFriendlyShipDespawn(callback: (Ship) -> Unit) = friendlyShipDespawnListeners.remove(callback)
@@ -75,10 +84,8 @@ class Model {
     fun subscribeHostileShipDespawn(callback: (Ship) -> Unit) = hostileShipDespawnListeners.add(callback)
     fun unsubscribeHostileShipDespawn(callback: (Ship) -> Unit) = hostileShipDespawnListeners.remove(callback)
 
-
     fun subscribeFriendlyProjectileSpawn(callback: (Projectile, Any) -> Unit) = friendlyProjectileSpawnListeners.add(callback)
     fun subscribeFriendlyProjectileDespawn(callback: (Projectile) -> Unit) = friendlyProjectileDespawnListeners.add(callback)
     fun subscribeHostileProjectileSpawn(callback: (Projectile, Any) -> Unit) = hostileProjectileSpawnListeners.add(callback)
     fun subscribeHostileProjectileDespawn(callback: (Projectile) -> Unit) = hostileProjectileDespawnListeners.add(callback)
-
 }

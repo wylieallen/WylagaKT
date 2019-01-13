@@ -4,7 +4,10 @@ import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
 
-class CollisionEngine(private val minY: Double = -100.0, private val maxY: Double = 1000.0) : Engine {
+class CollisionEngine(private val projectileMinY: Double = -100.0, private val projectileMaxY: Double = 1000.0,
+                      private val playerMinX: Double = 0.0, private val playerMaxX: Double = 1550.0,
+                      private val playerMinY: Double = 0.0, private val playerMaxY: Double = 850.0) : Engine {
+    private val playerShips = mutableSetOf<Ship>()
     private val friendlyShips = mutableSetOf<Ship>()
     private val friendlyProjectiles = mutableSetOf<Projectile>()
     private val hostileShips = mutableSetOf<Ship>()
@@ -23,10 +26,53 @@ class CollisionEngine(private val minY: Double = -100.0, private val maxY: Doubl
     fun removeFriendly(ship: Ship) = friendlyShips.remove(ship)
     fun removeFriendly(projectile: Projectile) = friendlyProjectiles.remove(projectile)
 
+    fun addPlayer(ship: Ship) = playerShips.add(ship)
+    fun removePlayer(ship: Ship) = playerShips.remove(ship)
+
     fun removeHostile(ship: Ship) = hostileShips.remove(ship)
     fun removeHostile(projectile: Projectile) = hostileProjectiles.remove(projectile)
 
     override fun tick() {
+        // Apply out-of-bounds constraints
+        for(player in playerShips) {
+            if(player.y < playerMinY) {
+                player.y = playerMinY
+            } else if(player.y > playerMaxY) {
+                player.y = playerMaxY
+            }
+
+            if(player.x < playerMinX) {
+                player.x = playerMinX
+            } else if(player.x > playerMaxX) {
+                player.x = playerMaxX
+            }
+        }
+
+        for(projectile in friendlyProjectiles) {
+            if(projectile.y < projectileMinY || projectile.y > projectileMaxY) {
+                projectile.disable()
+            }
+        }
+
+        for(projectile in hostileProjectiles) {
+            if(projectile.y < projectileMinY || projectile.y > projectileMaxY) {
+                projectile.disable()
+            }
+        }
+
+        // Process collisions
+        for(player in playerShips) {
+            for(projectile in hostileProjectiles) {
+                if(entitiesCollide(player, projectile)) {
+                    friendlyShipToProjectileListeners.forEach{ it(projectile, player) }
+                }
+            }
+            for(hostile in hostileShips) {
+                if(entitiesCollide(player, hostile)) {
+                    shipToShipListeners.forEach { it(player, hostile) }
+                }
+            }
+        }
 
         for(friendly in friendlyShips) {
             for(projectile in hostileProjectiles) {
@@ -46,18 +92,6 @@ class CollisionEngine(private val minY: Double = -100.0, private val maxY: Doubl
                 if(entitiesCollide(projectile, hostile)) {
                     hostileShipToProjectileListeners.forEach{ it(projectile, hostile) }
                 }
-            }
-        }
-
-        for(projectile in friendlyProjectiles) {
-            if(projectile.y < minY || projectile.y > maxY) {
-                projectile.disable()
-            }
-        }
-
-        for(projectile in hostileProjectiles) {
-            if(projectile.y < minY || projectile.y > maxY) {
-                projectile.disable()
             }
         }
     }
