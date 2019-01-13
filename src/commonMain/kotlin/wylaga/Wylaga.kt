@@ -31,6 +31,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
     private var controller: Controller
 
     private val stageIterator: StageIterator
+    private var playerScore = 0
 
     init {
         // Initialize background:
@@ -51,6 +52,9 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribeHostileShipDespawn(view::explodeSprite)
         model.subscribeHostileProjectileDespawn(view::explodeSprite)
 
+        model.subscribeFriendlyShipDespawn { playerScore -= it.points }
+        model.subscribeHostileShipDespawn { playerScore += it.points }
+
         val friendlyWeaponFactory = WeaponFactory(onProjectileDespawn = model::despawnFriendlyProjectile, onProjectileDisable = model::flagForExpiration)
         val friendlyShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnFriendlyShip, spawnProjectile = model::spawnFriendlyProjectile)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
@@ -68,6 +72,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         view.addToHud(TranslatedDisplayable(40.0, 40.0, StringDisplayable({"SHIELD: " + player.health.toInt() + "/" + player.maxHealth.toInt()}, "arial", 16, Color.WHITE)))
         view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
+        view.addToHud(TranslatedDisplayable(40.0, 80.0, StringDisplayable({"POINTS: $playerScore"}, "arial", 16, Color.WHITE)))
 
         val hostileWeaponFactory = WeaponFactory(onProjectileDespawn = model::despawnHostileProjectile, onProjectileDisable = model::flagForExpiration)
         val hostileShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile)

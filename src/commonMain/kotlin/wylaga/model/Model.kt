@@ -12,6 +12,7 @@ import wylaga.model.systems.movement.MovementEngine
 import wylaga.model.systems.piloting.PilotingEngine
 
 class Model {
+
     private val collisionEngine = CollisionEngine()
     private val movementEngine = MovementEngine()
     private val firingEngine = FiringEngine()

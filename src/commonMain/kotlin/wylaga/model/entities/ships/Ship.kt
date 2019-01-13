@@ -8,7 +8,7 @@ import wylaga.model.systems.firing.Fireable
 import wylaga.model.systems.piloting.Pilotable
 import wylaga.util.DirectionVector
 
-open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double,
+open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double, var points: Int,
                 private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit, var activePilot: Pilot)
     : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable, Pilotable, Boostable {
 
