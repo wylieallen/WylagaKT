@@ -9,7 +9,7 @@ import wylaga.model.systems.piloting.Pilotable
 import wylaga.util.DirectionVector
 
 open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double,
-                private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit, private val pilot: Pilot)
+                private val onDeath: (Ship) -> Unit, private val onExpire: (Ship) -> Unit, private val onFire: (Ship) -> Unit, var activePilot: Pilot)
     : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable, Pilotable, Boostable {
 
     override var trajectory: DirectionVector
@@ -86,7 +86,7 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
 
     override fun expire() = onExpire(this)
     override fun fire() = if(wantsToFire) { onFire(this); fireListeners.forEach{ it(this) } } else {}
-    override fun pilot() { pilot.update(this) }
+    override fun pilot() { activePilot.update(this) }
 
     private fun getSign(delta: Double): Sign {
         return when {

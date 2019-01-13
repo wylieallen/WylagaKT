@@ -1,6 +1,6 @@
 package wylaga.model.entities.weapons
 
-import wylaga.model.entities.Projectile
+import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 
 class NullWeapon private constructor() : Weapon {

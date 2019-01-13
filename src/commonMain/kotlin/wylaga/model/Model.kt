@@ -1,6 +1,6 @@
 package wylaga.model
 
-import wylaga.model.entities.Projectile
+import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
 import wylaga.model.systems.boosting.BoostingEngine

@@ -1,7 +1,7 @@
 package wylaga.model.entities.ships
 
 import wylaga.model.entities.Entity
-import wylaga.model.entities.Projectile
+import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.pilots.Pilot
 import wylaga.model.entities.weapons.NullWeapon
 import wylaga.model.entities.weapons.Weapon
