@@ -1,5 +1,6 @@
 package wylaga.model
 
+import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
@@ -35,6 +36,9 @@ class Model {
     private val friendlyProjectileDespawnListeners = mutableSetOf<(Projectile) -> Unit>()
     private val hostileProjectileDespawnListeners = mutableSetOf<(Projectile) -> Unit>()
 
+    private val pickupSpawnListeners = mutableSetOf<(Pickup) -> Unit>()
+    private val pickupDespawnListeners = mutableSetOf<(Pickup) -> Unit>()
+
     init {
         subscribePlayerShipSpawn { movementEngine.add(it); collisionEngine.addPlayer(it); firingEngine.add(it); pilotingEngine.add(it); boostingEngine.add(it); }
         subscribePlayerShipDespawn { movementEngine.remove(it); collisionEngine.removePlayer(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
@@ -51,9 +55,13 @@ class Model {
         subscribeHostileProjectileSpawn { projectile: Projectile, _ -> movementEngine.add(projectile); collisionEngine.addHostile(projectile); }
         subscribeHostileProjectileDespawn { movementEngine.remove(it); collisionEngine.removeHostile(it); }
 
+        subscribePickupSpawn { movementEngine.add(it); collisionEngine.addPickup(it); }
+        subscribePickupDespawn { movementEngine.remove(it); collisionEngine.removePickup(it); }
+
         collisionEngine.subscribeShipToShip { a: Ship, b: Ship -> a.damage(30.0); b.damage(30.0); }
         collisionEngine.subscribeFriendlyShipToProjectile(Projectile::impact)
         collisionEngine.subscribeHostileShipToProjectile(Projectile::impact)
+        collisionEngine.subscribePlayerToPickup{pickup, ship -> pickup.effect(ship); pickup.disable(); }
     }
 
     fun tick() = engines.forEach(Engine::tick)
@@ -74,6 +82,9 @@ class Model {
     fun spawnHostileProjectile(projectile: Projectile, source: Any) = hostileProjectileSpawnListeners.forEach { it(projectile, source) }
     fun despawnHostileProjectile(projectile: Projectile) = hostileProjectileDespawnListeners.forEach { it(projectile) }
 
+    fun spawnPickup(pickup: Pickup) = pickupSpawnListeners.forEach { it(pickup) }
+    fun despawnPickup(pickup: Pickup) = pickupDespawnListeners.forEach { it(pickup) }
+
     fun subscribePlayerShipSpawn(callback: (Ship) -> Unit) = playerShipSpawnListeners.add(callback)
     fun subscribePlayerShipDespawn(callback: (Ship) -> Unit) = playerShipDespawnListeners.add(callback)
     fun subscribeFriendlyShipSpawn(callback: (Ship) -> Unit) = friendlyShipSpawnListeners.add(callback)
@@ -88,4 +99,7 @@ class Model {
     fun subscribeFriendlyProjectileDespawn(callback: (Projectile) -> Unit) = friendlyProjectileDespawnListeners.add(callback)
     fun subscribeHostileProjectileSpawn(callback: (Projectile, Any) -> Unit) = hostileProjectileSpawnListeners.add(callback)
     fun subscribeHostileProjectileDespawn(callback: (Projectile) -> Unit) = hostileProjectileDespawnListeners.add(callback)
+
+    fun subscribePickupSpawn(callback: (Pickup) -> Unit) = pickupSpawnListeners.add(callback)
+    fun subscribePickupDespawn(callback: (Pickup) -> Unit) = pickupDespawnListeners.add(callback)
 }

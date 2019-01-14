@@ -1,5 +1,6 @@
 package wylaga.model.systems.collision
 
+import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
@@ -12,10 +13,12 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
     private val friendlyProjectiles = mutableSetOf<Projectile>()
     private val hostileShips = mutableSetOf<Ship>()
     private val hostileProjectiles = mutableSetOf<Projectile>()
+    private val pickups = mutableSetOf<Pickup>()
 
     private val shipToShipListeners = mutableSetOf<(Ship, Ship) -> Unit>()
     private val hostileShipToProjectileListeners = mutableSetOf<(Projectile, Ship) -> Unit>()
     private val friendlyShipToProjectileListeners = mutableSetOf<(Projectile, Ship) -> Unit>()
+    private val playerToPickupListeners = mutableSetOf<(Pickup, Ship) -> Unit>()
 
     fun addFriendly(ship: Ship) = friendlyShips.add(ship)
     fun addFriendly(projectile: Projectile) = friendlyProjectiles.add(projectile)
@@ -32,8 +35,17 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
     fun removeHostile(ship: Ship) = hostileShips.remove(ship)
     fun removeHostile(projectile: Projectile) = hostileProjectiles.remove(projectile)
 
+    fun addPickup(pickup: Pickup) = pickups.add(pickup)
+    fun removePickup(pickup: Pickup) = pickups.remove(pickup)
+
     override fun tick() {
         // Apply out-of-bounds constraints
+        for(pickup in pickups) {
+            if(pickup.y < projectileMinY || pickup.y > projectileMaxY) {
+                pickup.disable()
+            }
+        }
+
         for(player in playerShips) {
             if(player.y < playerMinY) {
                 player.y = playerMinY
@@ -72,6 +84,11 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
                     shipToShipListeners.forEach { it(player, hostile) }
                 }
             }
+            for(pickup in pickups) {
+                if(entitiesCollide(player, pickup)) {
+                    playerToPickupListeners.forEach{ it(pickup, player) }
+                }
+            }
         }
 
         for(friendly in friendlyShips) {
@@ -107,4 +124,5 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
     fun subscribeHostileShipToProjectile(listener: (Projectile, Ship) -> Unit) = hostileShipToProjectileListeners.add(listener)
     fun subscribeFriendlyShipToProjectile(listener: (Projectile, Ship) -> Unit) = friendlyShipToProjectileListeners.add(listener)
     fun subscribeShipToShip(listener: (Ship, Ship) -> Unit) = shipToShipListeners.add(listener)
+    fun subscribePlayerToPickup(listener: (Pickup, Ship) -> Unit) = playerToPickupListeners.add(listener)
 }

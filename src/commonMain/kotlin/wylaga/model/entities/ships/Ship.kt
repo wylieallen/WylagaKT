@@ -45,7 +45,7 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
     val maxEnergy = 200.0
 
     var energy = maxEnergy
-        private set(nextFuel) {
+        set(nextFuel) {
             field = nextFuel
             if(energy < 0) {
                 field = 0.0

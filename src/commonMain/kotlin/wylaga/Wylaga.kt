@@ -9,9 +9,11 @@ import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.tickables.Tickable
 import wylaga.view.View
 import wylaga.model.Model
+import wylaga.model.PickupFactory
 import wylaga.model.ShipFactory
 import wylaga.model.WeaponFactory
 import wylaga.model.entities.Entity
+import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.pilots.ControlBufferPilot
 import wylaga.model.entities.ships.Ship
@@ -22,6 +24,7 @@ import wylaga.view.backgrounds.Starfield
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.displayables.primitives.StringDisplayable
 import wylaga.view.display.image.Base64Encoding
+import kotlin.random.Random
 
 const val WIDTH = 1600.0
 const val HEIGHT = 900.0
@@ -48,21 +51,32 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribeHostileShipSpawn(view::spawnSprite)
         model.subscribeFriendlyProjectileSpawn(view::spawnChildSprite)
         model.subscribeHostileProjectileSpawn(view::spawnChildSprite)
+        model.subscribePickupSpawn { view.spawnChildSprite(it, it.effect) }
 
         model.subscribePlayerShipDespawn(view::explodeSprite)
         model.subscribeFriendlyShipDespawn(view::explodeSprite)
         model.subscribeFriendlyProjectileDespawn(view::explodeSprite)
         model.subscribeHostileShipDespawn(view::explodeSprite)
         model.subscribeHostileProjectileDespawn(view::explodeSprite)
+        model.subscribePickupDespawn(view::explodeSprite)
 
         model.subscribePlayerShipDespawn { playerScore -= it.points }
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
 
+
+        val pickupFactory = PickupFactory(model::flagForExpiration, model::despawnPickup)
+
+        model.subscribeHostileShipDespawn { if(Random.nextDouble() <= 1) { model.spawnPickup(pickupFactory.random(it.x + (it.width / 2), it.y + (it.height / 2))) }}
+
         val friendlyWeaponFactory = WeaponFactory(onProjectileDespawn = model::despawnFriendlyProjectile, onProjectileDisable = model::flagForExpiration)
 //        val friendlyShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnFriendlyShip, spawnProjectile = model::spawnFriendlyProjectile)
         val playerShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnPlayerShip, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
+
+        // Initialize pickup sprites:
+        view.setSpriteMaker(Pickup.Effect.HEALING, spriteFactory::makeHealingPickup)
+        view.setSpriteMaker(Pickup.Effect.ENERGY, spriteFactory::makeEnergyPickup)
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()

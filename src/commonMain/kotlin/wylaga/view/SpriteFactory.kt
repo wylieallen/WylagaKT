@@ -1,6 +1,7 @@
 package wylaga.view
 
 import wylaga.model.entities.Entity
+import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.ships.Ship
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.Displayable
@@ -15,7 +16,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     private val imageLoader = ImageLoader(decodeBase64)
 
     fun makeEnemy(enemy: Ship) : Sprite {
-        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.enemyBaseChassis, imageLoader.enemyHurtChassis, imageLoader.enemyDireChassis)
+        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.enemyBaseChassis, imageLoader.enemyHurtChassis, imageLoader.enemyDireChassis, imageLoader.enemyHealChassis)
         val special = makeStandardShipSpecial(enemy, 3.0, 13.0, imageLoader.enemyBaseSpecial, imageLoader.enemyBoostSpecial)
         val weapon = makeStandardWeapon(enemy, 6.0, 1.0, imageLoader.enemyBaseWeapon, imageLoader.enemyFiringWeapon)
         val engine = makeStandardEngine(enemy, 7.0, 22.0, imageLoader.enemyBaseEngine, imageLoader.enemyBoostEngine, imageLoader.enemyBaseEngine, imageLoader.enemyBoostEngine, imageLoader.enemyBoostEngine)
@@ -24,7 +25,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     }
 
     fun makeBigEnemy(enemy: Ship) : Sprite {
-        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseChassis, imageLoader.bigEnemyHurtChassis, imageLoader.bigEnemyDireChassis)
+        val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseChassis, imageLoader.bigEnemyHurtChassis, imageLoader.bigEnemyDireChassis, imageLoader.bigEnemyHealChassis)
         val special = makeStandardShipSpecial(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseSpecial, imageLoader.bigEnemyBoostSpecial)
         val weapon = makeStandardWeapon(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseWeapon, imageLoader.bigEnemyFiringWeapon)
         val engine = makeStandardEngine(enemy, 0.0, 0.0, imageLoader.bigEnemyBaseEngine1, imageLoader.bigEnemyBaseEngine2,
@@ -75,7 +76,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         val direChassis = imageLoader.playerDireChassis
         val healChassis = imageLoader.playerHealChassis
 
-        return makeStandardShipChassis(player, 0.0, 0.0, baseChassis, hurtChassis, direChassis)
+        return makeStandardShipChassis(player, 0.0, 0.0, baseChassis, hurtChassis, direChassis, healChassis)
     }
 
     private fun makeStandardEngine(ship: Ship, x: Double, y: Double, base1: Displayable, base2: Displayable, brake: Displayable, boost1: Displayable, boost2: Displayable) : Pair<Displayable, Tickable> {
@@ -155,7 +156,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Pair(special, NullTickable.instance)
     }
 
-    private fun makeStandardShipChassis(ship: Ship, x: Double, y: Double, base: Displayable, hurt: Displayable, dire: Displayable) : Pair<Displayable, Tickable> {
+    private fun makeStandardShipChassis(ship: Ship, x: Double, y: Double, base: Displayable, hurt: Displayable, dire: Displayable, heal: Displayable) : Pair<Displayable, Tickable> {
         val chassis = TranslatedDisplayable(x, y, base)
 
         val chassisAnimation = DelegateTickable()
@@ -168,13 +169,13 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
             }
         }
 
-//        ship.subscribeHeal {
-//            chassis.target = heal
-//            chassisAnimation.delegate = CountdownTickable(6) {
-//                chassis.target = if(it.health <= (it.maxHealth * 0.2)) dire else base
-//                chassisAnimation.delegate = NullTickable.instance
-//            }
-//        }
+        ship.subscribeHeal {
+            chassis.target = heal
+            chassisAnimation.delegate = CountdownTickable(6) {
+                chassis.target = if(it.health <= (it.maxHealth * 0.2)) dire else base
+                chassisAnimation.delegate = NullTickable.instance
+            }
+        }
 
         return Pair(chassis, chassisAnimation)
     }
@@ -182,4 +183,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makeRedPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)
 
     fun makeGreenSquareProjectile(projectile: Entity) = Sprite(projectile, imageLoader.greenSquareProjectile, onExpire, Color.GREEN, 70, 50.0)
+
+    fun makeHealingPickup(pickup: Entity) = Sprite(pickup, imageLoader.healthPickup, onExpire, Color.CYAN, 50,  45.0)
+    fun makeEnergyPickup(pickup: Entity) = Sprite(pickup, imageLoader.energyPickup, onExpire, Color.YELLOW, 50, 45.0)
 }
