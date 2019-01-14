@@ -11,6 +11,7 @@ import wylaga.view.View
 import wylaga.model.Model
 import wylaga.model.ShipFactory
 import wylaga.model.WeaponFactory
+import wylaga.model.entities.Entity
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.pilots.ControlBufferPilot
 import wylaga.model.entities.ships.Ship
@@ -60,7 +61,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val friendlyWeaponFactory = WeaponFactory(onProjectileDespawn = model::despawnFriendlyProjectile, onProjectileDisable = model::flagForExpiration)
 //        val friendlyShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnFriendlyShip, spawnProjectile = model::spawnFriendlyProjectile)
-        val playerShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnPlayerShip, spawnProjectile = model::spawnFriendlyProjectile)
+        val playerShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnPlayerShip, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize player and controller:
@@ -79,7 +80,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToHud(TranslatedDisplayable(40.0, 80.0, StringDisplayable({"POINTS: $playerScore"}, "arial", 16, Color.WHITE)))
 
         val hostileWeaponFactory = WeaponFactory(onProjectileDespawn = model::despawnHostileProjectile, onProjectileDisable = model::flagForExpiration)
-        val hostileShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile)
+        val hostileShipFactory = ShipFactory(onDeath = model::flagForExpiration, onExpire = model::despawnHostileShip, spawnProjectile = model::spawnHostileProjectile, orientation = Entity.Orientation.SOUTH)
         stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory), this::loadAndStartNextStage)
 
         loadAndStartNextStage()

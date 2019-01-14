@@ -12,7 +12,7 @@ class WeaponFactory(private val onProjectileDespawn: (Projectile) -> Unit, priva
     }
 
     fun makePlayerWeapon(damage: Double) : Weapon {
-        return SimpleWeapon(4.0, 15.0, 6.0, {projectile, ship -> onImpact(projectile, ship, damage) }, onProjectileDespawn, onProjectileDisable)
+        return SimpleWeapon(4.0, 15.0, 9.0, {projectile, ship -> onImpact(projectile, ship, damage) }, onProjectileDespawn, onProjectileDisable)
     }
 
     fun makeEnemyWeapon(damage: Double) : Weapon {

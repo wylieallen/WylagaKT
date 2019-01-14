@@ -71,6 +71,28 @@ class StageFactory(private val weaponFactory: WeaponFactory, private val shipFac
         return SimpleStage(spritePairs, weaponPairs, onStageComplete)
     }
 
+    fun stage4(onStageComplete: () -> Unit) : Stage {
+        val pair = makeBossWing(800.0, 125.0)
+        return SimpleStage(pair.first, pair.second, onStageComplete)
+    }
+
+    private fun makeBossWing(x: Double, y: Double): Pair<Set<Pair<Ship, Sprite>>, Set<Pair<Weapon, (Entity) -> Sprite>>> {
+        val spritePairs = mutableSetOf<Pair<Ship, Sprite>>()
+        val weaponPairs = mutableSetOf<Pair<Weapon, (Entity) -> Sprite>>()
+
+        val pairs = makeNemesis(x - 25.0, y)
+        spritePairs.add(pairs.first)
+        weaponPairs.add(pairs.second)
+
+        return Pair(spritePairs, weaponPairs)
+    }
+
+    private fun makeNemesis(x: Double, y: Double) : Pair<Pair<Ship, Sprite>, Pair<Weapon, (Entity) -> Sprite>> {
+        val weapon = weaponFactory.makePlayerWeapon(50.0)
+        val nemesis = shipFactory.makeEvilPlayer(x, y - 300, weapon = weapon, pilot = makeRallyPilot(x, y))
+        return Pair(Pair(nemesis, spriteFactory.makePlayer(nemesis)), Pair(weapon, spriteFactory::makeRedPlayerProjectile))
+    }
+
     private fun makeRallyPilot(x: Double, y: Double) = RallyPilot(x, y) { it.activePilot = RandomPilot(0.01, 0.02, 0.01) }
 
     private fun makeWing(x: Double, y: Double): Pair<Set<Pair<Ship, Sprite>>, Set<Pair<Weapon, (Entity) -> Sprite>>> {

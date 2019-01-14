@@ -1,10 +1,10 @@
 package wylaga.stages
 
-class StageIterator(stageFactory: StageFactory, private val onComplete: () -> Unit) {
-    private val stageMakers = arrayOf(stageFactory::stage1, stageFactory::stage2, stageFactory::stage3)
+class StageIterator(stageFactory: StageFactory, private val onComplete: () -> Unit) : Iterator<Stage> {
+    private val stageMakers = arrayOf(stageFactory::stage1, stageFactory::stage2, stageFactory::stage3, stageFactory::stage4)
     private var stageCount = 0
 
-    fun next() = stageMakers[stageCount++](onComplete)
+    override fun next() = stageMakers[stageCount++](onComplete)
 
-    fun hasNext() : Boolean = stageCount < stageMakers.size
+    override fun hasNext() : Boolean = stageCount < stageMakers.size
 }
