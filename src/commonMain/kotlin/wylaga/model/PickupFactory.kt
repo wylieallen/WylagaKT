@@ -4,7 +4,7 @@ import wylaga.model.entities.pickups.Pickup
 import wylaga.util.DirectionVector
 import kotlin.random.Random
 
-class PickupFactory(private val onDisable: (Pickup) -> Unit, private val onExpire: (Pickup) -> Unit) {
+class PickupFactory(private val onDisable: (Pickup) -> Unit) {
     fun random(x: Double, y: Double) : Pickup {
         val roll = Random.nextDouble()
         return if(roll <= 0.33) {
@@ -14,5 +14,5 @@ class PickupFactory(private val onDisable: (Pickup) -> Unit, private val onExpir
         }
     }
 
-    private fun makePickup(x: Double, y: Double, effect: Pickup.Effect) : Pickup = Pickup(x - 7.5, y - 7.5, 15.0, 15.0, DirectionVector.SOUTH, 1.0, onDisable, onExpire, effect)
+    private fun makePickup(x: Double, y: Double, effect: Pickup.Effect) : Pickup = Pickup(x - 7.5, y - 7.5, 15.0, 15.0, DirectionVector.SOUTH, 1.0, onDisable, effect)
 }

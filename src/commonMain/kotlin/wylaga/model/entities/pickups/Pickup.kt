@@ -4,10 +4,8 @@ import wylaga.model.entities.Entity
 import wylaga.model.entities.ships.Ship
 import wylaga.util.DirectionVector
 
-class Pickup(x: Double, y: Double, width: Double, height: Double, trajectory: DirectionVector, velocity: Double, private val onDisable: (Pickup) -> Unit, private val onExpire: (Pickup) -> Unit, val effect: Effect)
+class Pickup(x: Double, y: Double, width: Double, height: Double, trajectory: DirectionVector, velocity: Double, private val onDisable: (Pickup) -> Unit,  val effect: Effect)
     : Entity(x, y, width, height, Orientation.NORTH, trajectory, velocity) {
-
-    override fun expire() = onExpire(this)
 
     fun disable() = onDisable(this)
 
