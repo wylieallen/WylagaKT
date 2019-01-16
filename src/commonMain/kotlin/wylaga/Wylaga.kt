@@ -14,9 +14,8 @@ import wylaga.model.ShipFactory
 import wylaga.model.WeaponFactory
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pickups.Pickup
-import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.pilots.ControlBufferPilot
-import wylaga.model.entities.ships.Ship
+import wylaga.model.systems.expiration.Cause
 import wylaga.stages.StageFactory
 import wylaga.stages.StageIterator
 import wylaga.view.SpriteFactory
@@ -54,27 +53,28 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         model.subscribePlayerShipDespawn(view::explodeSprite)
         model.subscribeFriendlyShipDespawn(view::explodeSprite)
-        model.subscribeFriendlyProjectileDespawn(view::explodeSprite)
+        model.subscribeFriendlyProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) }
         model.subscribeHostileShipDespawn(view::explodeSprite)
-        model.subscribeHostileProjectileDespawn(view::explodeSprite)
-        model.subscribePickupDespawn(view::explodeSprite)
+        model.subscribeHostileProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) }
+        model.subscribePickupDespawn { pickup, cause -> if(cause === Cause.IMPACT) view.explodeSprite(pickup) }
 
         model.subscribePlayerShipDespawn { playerScore -= it.points }
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
 
-
-        val pickupFactory = PickupFactory {model.despawnPickup(it)}
+        val pickupFactory = PickupFactory {pickup, cause -> model.despawnPickup(pickup, cause)}
 
         model.subscribeHostileShipDespawn { if(Random.nextDouble() <= 1) { model.spawnPickup(pickupFactory.random(it.x + (it.width / 2), it.y + (it.height / 2))) }}
 
-        val friendlyWeaponFactory = WeaponFactory {model.despawnFriendlyProjectile(it)}
+        val friendlyWeaponFactory = WeaponFactory {projectile, cause ->  model.despawnFriendlyProjectile(projectile, cause)}
         val playerShipFactory = ShipFactory(onDeath = {model.despawnPlayerShip(it)}, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         // Initialize pickup sprites:
         view.setSpriteMaker(Pickup.Effect.HEALING, spriteFactory::makeHealingPickup)
         view.setSpriteMaker(Pickup.Effect.ENERGY, spriteFactory::makeEnergyPickup)
+
+        initializeLifecycleDiagnosticWidget()
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()
@@ -91,11 +91,38 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
         view.addToHud(TranslatedDisplayable(40.0, 80.0, StringDisplayable({"POINTS: $playerScore"}, "arial", 16, Color.WHITE)))
 
-        val hostileWeaponFactory = WeaponFactory {model.despawnHostileProjectile(it)}
+        val hostileWeaponFactory = WeaponFactory {projectile, cause ->  model.despawnHostileProjectile(projectile, cause)}
         val hostileShipFactory = ShipFactory(onDeath = {model.despawnHostileShip(it)}, spawnProjectile = model::spawnHostileProjectile, orientation = Entity.Orientation.SOUTH)
         stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory), this::loadAndStartNextStage)
 
         loadAndStartNextStage()
+    }
+
+    private fun initializeLifecycleDiagnosticWidget() {
+        var projectilesActive = 0
+        var projectilesEver = 0
+        var shipsActive = 0
+        var shipsEver = 0
+        var pickupsActive = 0
+        var pickupsEver = 0
+
+        model.subscribePlayerShipSpawn { shipsActive++; shipsEver++; }
+        model.subscribeFriendlyShipSpawn { shipsActive++; shipsEver++; }
+        model.subscribeHostileShipSpawn { shipsActive++; shipsEver++; }
+        model.subscribeFriendlyProjectileSpawn { _, _ -> projectilesActive++; projectilesEver++; }
+        model.subscribeHostileProjectileSpawn { _, _ -> projectilesActive++; projectilesEver++; }
+        model.subscribePickupSpawn { pickupsActive++; pickupsEver++; }
+
+        model.subscribePlayerShipDespawn { shipsActive-- }
+        model.subscribeFriendlyShipDespawn { shipsActive-- }
+        model.subscribeHostileShipDespawn { shipsActive-- }
+        model.subscribeFriendlyProjectileDespawn { _, _ -> projectilesActive-- }
+        model.subscribeHostileProjectileDespawn { _, _ -> projectilesActive-- }
+        model.subscribePickupDespawn { _, _ -> pickupsActive-- }
+
+        view.addToHud(TranslatedDisplayable(40.0, 800.0, StringDisplayable({ "SHIPS: $shipsActive/$shipsEver" }, "arial", 16, Color.WHITE)))
+        view.addToHud(TranslatedDisplayable(40.0, 820.0, StringDisplayable({ "PROJS: $projectilesActive/$projectilesEver" }, "arial", 16, Color.WHITE)))
+        view.addToHud(TranslatedDisplayable(40.0, 840.0, StringDisplayable({ "PKUPS: $pickupsActive/$pickupsEver" }, "arial", 16, Color.WHITE)))
     }
 
     private fun loadAndStartNextStage() {

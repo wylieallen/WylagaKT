@@ -3,9 +3,10 @@ package wylaga.model.entities.weapons
 import wylaga.model.entities.Entity
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
+import wylaga.model.systems.expiration.Cause
 
 class SimpleWeapon(private val projectileWidth: Double, private val projectileHeight: Double, private val projectileVelocity: Double,
-                   private val onImpact: (Projectile, Ship) -> Unit, private val onDisable: (Projectile) -> Unit) : Weapon {
+                   private val onImpact: (Projectile, Ship) -> Unit, private val onDisable: (Projectile, Cause) -> Unit) : Weapon {
 
     private val centerX = projectileWidth / 2
 

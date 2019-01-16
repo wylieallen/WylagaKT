@@ -1,10 +1,11 @@
 package wylaga.model
 
 import wylaga.model.entities.pickups.Pickup
+import wylaga.model.systems.expiration.Cause
 import wylaga.util.DirectionVector
 import kotlin.random.Random
 
-class PickupFactory(private val onDisable: (Pickup) -> Unit) {
+class PickupFactory(private val onDisable: (Pickup, Cause) -> Unit) {
     fun random(x: Double, y: Double) : Pickup {
         val roll = Random.nextDouble()
         return if(roll <= 0.33) {

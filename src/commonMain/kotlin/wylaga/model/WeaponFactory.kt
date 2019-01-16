@@ -4,11 +4,12 @@ import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.entities.weapons.SimpleWeapon
 import wylaga.model.entities.weapons.Weapon
+import wylaga.model.systems.expiration.Cause
 
-class WeaponFactory(private val onProjectileDisable: (Projectile) -> Unit) {
+class WeaponFactory(private val onProjectileDisable: (Projectile, Cause) -> Unit) {
     private fun onImpact(projectile: Projectile, ship: Ship, damage: Double) {
         ship.damage(damage)
-        projectile.disable()
+        projectile.disable(Cause.IMPACT)
     }
 
     fun makePlayerWeapon(damage: Double) : Weapon {

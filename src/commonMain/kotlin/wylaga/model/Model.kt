@@ -6,6 +6,7 @@ import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
 import wylaga.model.systems.boosting.BoostingEngine
 import wylaga.model.systems.collision.CollisionEngine
+import wylaga.model.systems.expiration.Cause
 import wylaga.model.systems.expiration.ExpirationEngine
 import wylaga.model.systems.firing.FiringEngine
 import wylaga.model.systems.movement.MovementEngine
@@ -41,18 +42,18 @@ class Model {
         subscribeHostileShipDespawn { movementEngine.remove(it); collisionEngine.removeHostile(it); firingEngine.remove(it); pilotingEngine.remove(it); boostingEngine.remove(it); }
 
         subscribeFriendlyProjectileSpawn { projectile: Projectile, _ -> movementEngine.add(projectile); collisionEngine.addFriendly(projectile); }
-        subscribeFriendlyProjectileDespawn { movementEngine.remove(it); collisionEngine.removeFriendly(it); }
+        subscribeFriendlyProjectileDespawn { projectile, _ -> movementEngine.remove(projectile); collisionEngine.removeFriendly(projectile); }
 
         subscribeHostileProjectileSpawn { projectile: Projectile, _ -> movementEngine.add(projectile); collisionEngine.addHostile(projectile); }
-        subscribeHostileProjectileDespawn { movementEngine.remove(it); collisionEngine.removeHostile(it); }
+        subscribeHostileProjectileDespawn { projectile, _ -> movementEngine.remove(projectile); collisionEngine.removeHostile(projectile); }
 
         subscribePickupSpawn { movementEngine.add(it); collisionEngine.addPickup(it); }
-        subscribePickupDespawn { movementEngine.remove(it); collisionEngine.removePickup(it); }
+        subscribePickupDespawn { pickup, _ -> movementEngine.remove(pickup); collisionEngine.removePickup(pickup); }
 
         collisionEngine.subscribeShipToShip { a: Ship, b: Ship -> a.damage(30.0); b.damage(30.0); }
         collisionEngine.subscribeFriendlyShipToProjectile(Projectile::impact)
         collisionEngine.subscribeHostileShipToProjectile(Projectile::impact)
-        collisionEngine.subscribePlayerToPickup{pickup, ship -> pickup.effect(ship); pickup.disable(); }
+        collisionEngine.subscribePlayerToPickup{pickup, ship -> pickup.effect(ship); pickup.disable(Cause.IMPACT); }
     }
 
     fun tick() = engines.forEach(Engine::tick)
@@ -66,13 +67,13 @@ class Model {
     fun despawnHostileShip(ship: Ship) = expirationEngine.addHostile(ship)
 
     fun spawnFriendlyProjectile(projectile: Projectile, source: Any) = friendlyProjectileSpawnListeners.forEach { it(projectile, source) }
-    fun despawnFriendlyProjectile(projectile: Projectile) = expirationEngine.addFriendly(projectile)
+    fun despawnFriendlyProjectile(projectile: Projectile, cause: Cause) = expirationEngine.addFriendly(projectile, cause)
 
     fun spawnHostileProjectile(projectile: Projectile, source: Any) = hostileProjectileSpawnListeners.forEach { it(projectile, source) }
-    fun despawnHostileProjectile(projectile: Projectile) = expirationEngine.addHostile(projectile)
+    fun despawnHostileProjectile(projectile: Projectile, cause: Cause) = expirationEngine.addHostile(projectile, cause)
 
     fun spawnPickup(pickup: Pickup) = pickupSpawnListeners.forEach { it(pickup) }
-    fun despawnPickup(pickup: Pickup) = expirationEngine.addPickup(pickup)
+    fun despawnPickup(pickup: Pickup, cause: Cause) = expirationEngine.addPickup(pickup, cause)
 
     fun subscribePlayerShipSpawn(callback: (Ship) -> Unit) = playerShipSpawnListeners.add(callback)
     fun subscribePlayerShipDespawn(callback: (Ship) -> Unit) = expirationEngine.subscribePlayer(callback)
@@ -84,10 +85,10 @@ class Model {
     fun unsubscribeHostileShipDespawn(callback: (Ship) -> Unit) = expirationEngine.unsubscribeHostile(callback)
 
     fun subscribeFriendlyProjectileSpawn(callback: (Projectile, Any) -> Unit) = friendlyProjectileSpawnListeners.add(callback)
-    fun subscribeFriendlyProjectileDespawn(callback: (Projectile) -> Unit) = expirationEngine.subscribeFriendly(callback)
+    fun subscribeFriendlyProjectileDespawn(callback: (Projectile, Cause) -> Unit) = expirationEngine.subscribeFriendly(callback)
     fun subscribeHostileProjectileSpawn(callback: (Projectile, Any) -> Unit) = hostileProjectileSpawnListeners.add(callback)
-    fun subscribeHostileProjectileDespawn(callback: (Projectile) -> Unit) = expirationEngine.subscribeHostile(callback)
+    fun subscribeHostileProjectileDespawn(callback: (Projectile, Cause) -> Unit) = expirationEngine.subscribeHostile(callback)
 
     fun subscribePickupSpawn(callback: (Pickup) -> Unit) = pickupSpawnListeners.add(callback)
-    fun subscribePickupDespawn(callback: (Pickup) -> Unit) = expirationEngine.subscribePickup(callback)
+    fun subscribePickupDespawn(callback: (Pickup, Cause) -> Unit) = expirationEngine.subscribePickup(callback)
 }

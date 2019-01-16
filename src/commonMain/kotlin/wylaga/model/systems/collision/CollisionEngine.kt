@@ -4,6 +4,7 @@ import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.Engine
+import wylaga.model.systems.expiration.Cause
 
 class CollisionEngine(private val projectileMinY: Double = -100.0, private val projectileMaxY: Double = 1000.0,
                       private val playerMinX: Double = 0.0, private val playerMaxX: Double = 1550.0,
@@ -42,7 +43,7 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
         // Apply out-of-bounds constraints
         for(pickup in pickups) {
             if(pickup.y < projectileMinY || pickup.y > projectileMaxY) {
-                pickup.disable()
+                pickup.disable(Cause.OUT_OF_BOUNDS)
             }
         }
 
@@ -62,13 +63,13 @@ class CollisionEngine(private val projectileMinY: Double = -100.0, private val p
 
         for(projectile in friendlyProjectiles) {
             if(projectile.y < projectileMinY || projectile.y > projectileMaxY) {
-                projectile.disable()
+                projectile.disable(Cause.OUT_OF_BOUNDS)
             }
         }
 
         for(projectile in hostileProjectiles) {
             if(projectile.y < projectileMinY || projectile.y > projectileMaxY) {
-                projectile.disable()
+                projectile.disable(Cause.OUT_OF_BOUNDS)
             }
         }
 
