@@ -186,4 +186,5 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
 
     fun makeHealingPickup(pickup: Entity) = Sprite(pickup, imageLoader.healthPickup, onExpire, Color.CYAN, 50,  45.0)
     fun makeEnergyPickup(pickup: Entity) = Sprite(pickup, imageLoader.energyPickup, onExpire, Color.YELLOW, 50, 45.0)
+    fun makePointsPickup(pickup: Entity) = Sprite(pickup, imageLoader.pointsPickup, onExpire, Color.YELLOW, 50, 45.0)
 }

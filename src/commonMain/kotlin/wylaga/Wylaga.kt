@@ -61,6 +61,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribePlayerShipDespawn { playerScore -= it.points }
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
+        model.subscribePickupDespawn { pickup, cause -> if(cause === Cause.IMPACT) playerScore += pickup.points }
 
         val pickupFactory = PickupFactory {pickup, cause -> model.despawnPickup(pickup, cause)}
 
@@ -73,8 +74,9 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         // Initialize pickup sprites:
         view.setSpriteMaker(Pickup.Effect.HEALING, spriteFactory::makeHealingPickup)
         view.setSpriteMaker(Pickup.Effect.ENERGY, spriteFactory::makeEnergyPickup)
+        view.setSpriteMaker(Pickup.Effect.POINTS, spriteFactory::makePointsPickup)
 
-        initializeLifecycleDiagnosticWidget()
+        //initializeLifecycleDiagnosticWidget()
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()

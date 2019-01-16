@@ -10,8 +10,10 @@ class PickupFactory(private val onDisable: (Pickup, Cause) -> Unit) {
         val roll = Random.nextDouble()
         return if(roll <= 0.33) {
             makePickup(x, y, Pickup.Effect.HEALING)
-        } else {
+        } else if(roll <= 0.67) {
             makePickup(x, y, Pickup.Effect.ENERGY)
+        } else {
+            makePickup(x, y, Pickup.Effect.POINTS)
         }
     }
 
