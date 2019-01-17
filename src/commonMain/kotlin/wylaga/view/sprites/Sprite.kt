@@ -32,4 +32,6 @@ class Sprite(private val entity: Entity,
         sprite.target = explosion
         tickable = explosion
     }
+
+    fun expire() = onExpire(this)
 }

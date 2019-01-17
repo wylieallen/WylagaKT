@@ -56,6 +56,7 @@ class View : Displayable, Tickable {
 
     fun spawnSprite(entity: Entity) = addSprite(getSprite(entity))
     fun despawnSprite(sprite: Sprite) { expiredSprites.add(sprite) }
+    fun despawnSprite(entity: Entity) { despawnSprite(getSprite(entity)) }
 
     fun explodeSprite(entity: Entity) = explodeSprite(getSprite(entity))
     fun explodeSprite(sprite: Sprite) = sprite.explode()

@@ -42,39 +42,53 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToBackground(starfield)
         view.addTickable(starfield)
 
-
         // Wire listeners:
         model.subscribePlayerShipSpawn(view::spawnSprite)
         model.subscribeFriendlyShipSpawn(view::spawnSprite)
         model.subscribeHostileShipSpawn(view::spawnSprite)
         model.subscribeFriendlyProjectileSpawn(view::spawnChildSprite)
         model.subscribeHostileProjectileSpawn(view::spawnChildSprite)
-        model.subscribePickupSpawn { view.spawnChildSprite(it, it.effect) }
+        model.subscribePickupSpawn(view::spawnSprite)
 
         model.subscribePlayerShipDespawn(view::explodeSprite)
         model.subscribeFriendlyShipDespawn(view::explodeSprite)
-        model.subscribeFriendlyProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) }
+        model.subscribeFriendlyProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) else view.despawnSprite(projectile) }
         model.subscribeHostileShipDespawn(view::explodeSprite)
-        model.subscribeHostileProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) }
-        model.subscribePickupDespawn { pickup, cause -> if(cause === Cause.IMPACT) view.explodeSprite(pickup) }
+        model.subscribeHostileProjectileDespawn { projectile, cause -> if(cause === Cause.IMPACT) view.explodeSprite(projectile) else view.despawnSprite(projectile) }
+        model.subscribePickupDespawn { pickup, cause -> if(cause === Cause.IMPACT) view.explodeSprite(pickup) else view.despawnSprite(pickup) }
 
         model.subscribePlayerShipDespawn { playerScore -= it.points }
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
-        model.subscribePickupDespawn { pickup, cause -> if(cause === Cause.IMPACT) playerScore += pickup.points }
 
-        val pickupFactory = PickupFactory {pickup, cause -> model.despawnPickup(pickup, cause)}
+        val pickupFactory = PickupFactory({pickup, cause -> model.despawnPickup(pickup, cause)}, {playerScore += it})
+        val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
-        model.subscribeHostileShipDespawn { if(Random.nextDouble() <= 1) { model.spawnPickup(pickupFactory.random(it.x + (it.width / 2), it.y + (it.height / 2))) }}
+        model.subscribeHostileShipDespawn {
+            if(Random.nextDouble() <= 1) {
+                val roll = Random.nextDouble()
+                when {
+                    roll <= 0.33 -> {
+                        val pickup = pickupFactory.makeHealing(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makeHealingPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.67 -> {
+                        val pickup = pickupFactory.makeEnergy(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makeEnergyPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    else -> {
+                        val pickup = pickupFactory.makePoints(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makePointsPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                }
+            }
+        }
 
         val friendlyWeaponFactory = WeaponFactory {projectile, cause ->  model.despawnFriendlyProjectile(projectile, cause)}
         val playerShipFactory = ShipFactory(onDeath = {model.despawnPlayerShip(it)}, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
-        val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
-
-        // Initialize pickup sprites:
-        view.setSpriteMaker(Pickup.Effect.HEALING, spriteFactory::makeHealingPickup)
-        view.setSpriteMaker(Pickup.Effect.ENERGY, spriteFactory::makeEnergyPickup)
-        view.setSpriteMaker(Pickup.Effect.POINTS, spriteFactory::makePointsPickup)
 
         //initializeLifecycleDiagnosticWidget()
 
