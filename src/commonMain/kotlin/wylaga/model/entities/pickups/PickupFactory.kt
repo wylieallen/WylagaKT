@@ -19,6 +19,8 @@ class PickupFactory(private val onDisable: (Pickup, Cause) -> Unit, private val 
             weaponLevel++
         }
     }
+    fun makeFullHealing(x: Double, y: Double) = makePickup(x, y) { addToScore(50); it.heal(it.maxHealth); }
+    fun makeHealthUpgrade(x: Double, y: Double) = makePickup(x, y) { addToScore(100); it.maxHealth += 10; it.heal(10.0); }
 
     private fun makePickup(x: Double, y: Double, effect: (Ship) -> Unit) = Pickup(x - 7.5, y - 7.5, 15.0, 15.0, DirectionVector.SOUTH, 1.0, onDisable, effect)
 }

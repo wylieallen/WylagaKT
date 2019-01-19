@@ -112,24 +112,36 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribeHostileShipDespawn {
             if(Random.nextDouble() <= 1) {
                 val roll = Random.nextDouble()
+                val x = it.x + (it.width / 2)
+                val y = it.y + (it.height / 2)
                 when {
                     roll <= 0.1 -> {
-                        val pickup = pickupFactory.makeHealing(it.x + (it.width / 2), it.y + (it.height / 2))
+                        val pickup = pickupFactory.makeHealing(x, y)
                         view.setSprite(pickup, spriteFactory.makeHealingPickup(pickup))
                         model.spawnPickup(pickup)
                     }
                     roll <= 0.2 -> {
-                        val pickup = pickupFactory.makeEnergy(it.x + (it.width / 2), it.y + (it.height / 2))
+                        val pickup = pickupFactory.makeEnergy(x, y)
                         view.setSprite(pickup, spriteFactory.makeEnergyPickup(pickup))
                         model.spawnPickup(pickup)
                     }
+                    roll <= 0.25 -> {
+                        val pickup = pickupFactory.makeFullHealing(x, y)
+                        view.setSprite(pickup, spriteFactory.makeFullHealingPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.3 -> {
+                        val pickup = pickupFactory.makeHealthUpgrade(x, y)
+                        view.setSprite(pickup, spriteFactory.makeHealthUpgradePickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
                     roll <= 0.8 -> {
-                        val pickup = pickupFactory.makeWeaponUpgrade(it.x + (it.width / 2), it.y + (it.height / 2))
+                        val pickup = pickupFactory.makeWeaponUpgrade(x, y)
                         view.setSprite(pickup, spriteFactory.makeWeaponUpgradePickup(pickup))
                         model.spawnPickup(pickup)
                     }
                     else -> {
-                        val pickup = pickupFactory.makePoints(it.x + (it.width / 2), it.y + (it.height / 2))
+                        val pickup = pickupFactory.makePoints(x, y)
                         view.setSprite(pickup, spriteFactory.makePointsPickup(pickup))
                         model.spawnPickup(pickup)
                     }
