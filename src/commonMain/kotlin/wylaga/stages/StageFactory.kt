@@ -1,7 +1,7 @@
 package wylaga.stages
 
-import wylaga.model.ShipFactory
-import wylaga.model.WeaponFactory
+import wylaga.model.entities.ships.ShipFactory
+import wylaga.model.entities.weapons.WeaponFactory
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pilots.RallyPilot
 import wylaga.model.entities.pilots.RandomPilot

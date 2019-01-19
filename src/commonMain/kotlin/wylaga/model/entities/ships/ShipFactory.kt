@@ -1,9 +1,8 @@
-package wylaga.model
+package wylaga.model.entities.ships
 
 import wylaga.model.entities.Entity
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.pilots.Pilot
-import wylaga.model.entities.ships.Ship
 import wylaga.model.entities.weapons.Weapon
 
 class ShipFactory(private val onDeath: (Ship) -> Unit, private val spawnProjectile: (Projectile, Any) -> Unit, private val orientation: Entity.Orientation) {

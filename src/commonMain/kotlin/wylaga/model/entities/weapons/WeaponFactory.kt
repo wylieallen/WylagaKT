@@ -1,9 +1,7 @@
-package wylaga.model
+package wylaga.model.entities.weapons
 
 import wylaga.model.entities.projectiles.Projectile
 import wylaga.model.entities.ships.Ship
-import wylaga.model.entities.weapons.SimpleWeapon
-import wylaga.model.entities.weapons.Weapon
 import wylaga.model.systems.expiration.Cause
 
 class WeaponFactory(private val onProjectileDisable: (Projectile, Cause) -> Unit) {

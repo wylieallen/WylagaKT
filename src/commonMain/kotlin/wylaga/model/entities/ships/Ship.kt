@@ -11,7 +11,7 @@ import wylaga.model.systems.firing.Fireable
 import wylaga.model.systems.piloting.Pilotable
 import wylaga.util.DirectionVector
 
-open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double, var points: Int,
+class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double, var points: Int,
                 private val onDeath: (Ship) -> Unit, hardpointX: Double, hardpointY: Double, var activePilot: Pilot, private val spawnProjectile: (Projectile, Any) -> Unit, weapon: Weapon = NullWeapon.INSTANCE)
     : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable, Pilotable, Boostable {
 
@@ -77,7 +77,7 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
         if(wantsToBoost) {
             if(energy > 0) {
                 velocity = boostVelocity
-                energy -= 3
+                energy -= 2
             } else {
                 velocity = baseVelocity
                 energy -= 1

@@ -61,9 +61,7 @@ class View : Displayable, Tickable {
     fun explodeSprite(entity: Entity) = explodeSprite(getSprite(entity))
     fun explodeSprite(sprite: Sprite) = sprite.explode()
 
-    fun setSpriteMaker(source: Any, spriteMaker: (Entity) -> Sprite) {
-        sourceToSpriteMakerMap[source] = spriteMaker
-    }
+    fun setSpriteMaker(source: Any, spriteMaker: (Entity) -> Sprite) { sourceToSpriteMakerMap[source] = spriteMaker }
 
     private fun getSprite(entity: Entity) = entityToSpriteMap.getOrPut(entity) {makeDefaultSprite(entity)}
     fun setSprite(entity: Entity, sprite: Sprite) = entityToSpriteMap.set(entity, sprite)

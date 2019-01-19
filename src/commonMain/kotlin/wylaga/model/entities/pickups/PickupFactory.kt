@@ -1,6 +1,5 @@
-package wylaga.model
+package wylaga.model.entities.pickups
 
-import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.expiration.Cause
 import wylaga.util.DirectionVector

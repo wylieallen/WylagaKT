@@ -9,11 +9,10 @@ import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.tickables.Tickable
 import wylaga.view.View
 import wylaga.model.Model
-import wylaga.model.PickupFactory
-import wylaga.model.ShipFactory
-import wylaga.model.WeaponFactory
+import wylaga.model.entities.pickups.PickupFactory
+import wylaga.model.entities.ships.ShipFactory
+import wylaga.model.entities.weapons.WeaponFactory
 import wylaga.model.entities.Entity
-import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.pilots.ControlBufferPilot
 import wylaga.model.systems.expiration.Cause
 import wylaga.stages.StageFactory
@@ -61,7 +60,9 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
 
-        val pickupFactory = PickupFactory({pickup, cause -> model.despawnPickup(pickup, cause)}, {playerScore += it})
+        val pickupFactory =
+            PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) },
+                { playerScore += it })
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
         model.subscribeHostileShipDespawn {
@@ -87,8 +88,17 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
             }
         }
 
-        val friendlyWeaponFactory = WeaponFactory {projectile, cause ->  model.despawnFriendlyProjectile(projectile, cause)}
-        val playerShipFactory = ShipFactory(onDeath = {model.despawnPlayerShip(it)}, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
+        val friendlyWeaponFactory = WeaponFactory { projectile, cause ->
+            model.despawnFriendlyProjectile(
+                projectile,
+                cause
+            )
+        }
+        val playerShipFactory = ShipFactory(
+            onDeath = { model.despawnPlayerShip(it) },
+            spawnProjectile = model::spawnFriendlyProjectile,
+            orientation = Entity.Orientation.NORTH
+        )
 
         //initializeLifecycleDiagnosticWidget()
 
@@ -107,8 +117,17 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
         view.addToHud(TranslatedDisplayable(40.0, 80.0, StringDisplayable({"POINTS: $playerScore"}, "arial", 16, Color.WHITE)))
 
-        val hostileWeaponFactory = WeaponFactory {projectile, cause ->  model.despawnHostileProjectile(projectile, cause)}
-        val hostileShipFactory = ShipFactory(onDeath = {model.despawnHostileShip(it)}, spawnProjectile = model::spawnHostileProjectile, orientation = Entity.Orientation.SOUTH)
+        val hostileWeaponFactory = WeaponFactory { projectile, cause ->
+            model.despawnHostileProjectile(
+                projectile,
+                cause
+            )
+        }
+        val hostileShipFactory = ShipFactory(
+            onDeath = { model.despawnHostileShip(it) },
+            spawnProjectile = model::spawnHostileProjectile,
+            orientation = Entity.Orientation.SOUTH
+        )
         stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory), this::loadAndStartNextStage)
 
         loadAndStartNextStage()
