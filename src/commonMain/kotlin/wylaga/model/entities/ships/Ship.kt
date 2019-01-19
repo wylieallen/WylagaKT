@@ -2,6 +2,9 @@ package wylaga.model.entities.ships
 
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pilots.Pilot
+import wylaga.model.entities.projectiles.Projectile
+import wylaga.model.entities.weapons.NullWeapon
+import wylaga.model.entities.weapons.Weapon
 import wylaga.model.systems.boosting.Boostable
 import wylaga.model.systems.damage.Damagable
 import wylaga.model.systems.firing.Fireable
@@ -9,8 +12,24 @@ import wylaga.model.systems.piloting.Pilotable
 import wylaga.util.DirectionVector
 
 open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: Double, orientation: Orientation, var maxHealth: Double, var points: Int,
-                private val onDeath: (Ship) -> Unit, private val onFire: (Ship) -> Unit, var activePilot: Pilot)
+                private val onDeath: (Ship) -> Unit, hardpointX: Double, hardpointY: Double, var activePilot: Pilot, private val spawnProjectile: (Projectile, Any) -> Unit, weapon: Weapon = NullWeapon.INSTANCE)
     : Entity(x, y, width, height, velocity = velocity, orientation = orientation), Damagable, Fireable, Pilotable, Boostable {
+
+    val hardpoint = Hardpoint(hardpointX, hardpointY, weapon)
+
+    private val damageListeners = mutableSetOf<(Ship) -> Unit>()
+    private val healListeners = mutableSetOf<(Ship) -> Unit>()
+    private val fireListeners = mutableSetOf<(Ship) -> Unit>()
+    private val trajectoryListeners = mutableSetOf<(Ship) -> Unit>()
+    private val boostListeners = mutableSetOf<(Ship) -> Unit>()
+    private val weaponChangeListeners = mutableSetOf<(Weapon) -> Unit>()
+
+    fun subscribeDamage(callback: (Ship) -> Unit) = damageListeners.add(callback)
+    fun subscribeHeal(callback: (Ship) -> Unit) = healListeners.add(callback)
+    fun subscribeFire(callback: (Ship) -> Unit) = fireListeners.add(callback)
+    fun subscribeTrajectory(callback: (Ship) -> Unit) = trajectoryListeners.add(callback)
+    fun subscribeBoost(callback: (Ship) -> Unit) = boostListeners.add(callback)
+    fun subscribeWeaponChange(callback: (Weapon) -> Unit) = weaponChangeListeners.add(callback)
 
     override var trajectory: DirectionVector
         get() = super.trajectory
@@ -69,22 +88,16 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
         }
     }
 
-    private val damageListeners = mutableSetOf<(Ship) -> Unit>()
-    private val healListeners = mutableSetOf<(Ship) -> Unit>()
-    private val fireListeners = mutableSetOf<(Ship) -> Unit>()
-    private val trajectoryListeners = mutableSetOf<(Ship) -> Unit>()
-    private val boostListeners = mutableSetOf<(Ship) -> Unit>()
-
-    fun subscribeDamage(callback: (Ship) -> Unit) = damageListeners.add(callback)
-    fun subscribeHeal(callback: (Ship) -> Unit) = healListeners.add(callback)
-    fun subscribeFire(callback: (Ship) -> Unit) = fireListeners.add(callback)
-    fun subscribeTrajectory(callback: (Ship) -> Unit) = trajectoryListeners.add(callback)
-    fun subscribeBoost(callback: (Ship) -> Unit) = boostListeners.add(callback)
-
     override fun damage(damage: Double) { health -= damage; damageListeners.forEach{ it(this) } }
     override fun heal(healing: Double) { health += healing; healListeners.forEach{ it(this) } }
 
-    override fun fire() = if(wantsToFire) { onFire(this); fireListeners.forEach{ it(this) } } else {}
+    override fun fire() {
+        if(wantsToFire) {
+            hardpoint.weapon.fire(this, hardpoint.x, hardpoint.y).forEach{spawnProjectile(it, hardpoint.weapon)}
+            fireListeners.forEach{ it(this) }
+        }
+    }
+
     override fun pilot() { activePilot.update(this) }
 
     private fun getSign(delta: Double): Sign {
@@ -93,6 +106,14 @@ open class Ship(x: Double, y: Double, width: Double, height: Double, velocity: D
             delta > 0 -> Sign.POSITIVE
             else -> Sign.ZERO
         }
+    }
+
+    inner class Hardpoint(val x: Double, val y: Double, weapon: Weapon = NullWeapon.INSTANCE) {
+        var weapon = weapon
+            set(value) {
+                field = value
+                weaponChangeListeners.forEach{ it(weapon) }
+            }
     }
 
     private enum class Sign {
