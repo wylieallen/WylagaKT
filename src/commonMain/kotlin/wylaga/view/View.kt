@@ -1,10 +1,12 @@
 package wylaga.view
 
 import wylaga.model.entities.Entity
+import wylaga.model.entities.weapons.Weapon
 import wylaga.view.display.Color
 import wylaga.view.display.Painter
 import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
+import wylaga.view.display.displayables.primitives.NullDisplayable
 import wylaga.view.display.displayables.primitives.SolidRect
 import wylaga.view.display.tickables.CompositeTickable
 import wylaga.view.display.tickables.Tickable
@@ -21,6 +23,7 @@ class View : Displayable, Tickable {
 
     private val entityToSpriteMap = mutableMapOf<Entity, Sprite>()
     private val sourceToSpriteMakerMap = mutableMapOf<Any, (Entity) -> Sprite>()
+    private val weaponToMuzzleFlashMap = mutableMapOf<Weapon, Displayable>()
 
     private val expiredSprites = mutableSetOf<Sprite>()
 
@@ -60,6 +63,9 @@ class View : Displayable, Tickable {
 
     fun explodeSprite(entity: Entity) = explodeSprite(getSprite(entity))
     fun explodeSprite(sprite: Sprite) = sprite.explode()
+
+    fun setMuzzleFlash(weapon: Weapon, displayable: Displayable) { weaponToMuzzleFlashMap[weapon] = displayable }
+    fun getMuzzleFlash(weapon: Weapon) : Displayable { return weaponToMuzzleFlashMap.getOrPut(weapon) { return NullDisplayable.INSTANCE } }
 
     fun setSpriteMaker(source: Any, spriteMaker: (Entity) -> Sprite) { sourceToSpriteMakerMap[source] = spriteMaker }
 

@@ -3,6 +3,7 @@ package wylaga.view
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.ships.Ship
+import wylaga.model.entities.weapons.Weapon
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
@@ -12,7 +13,7 @@ import wylaga.view.display.tickables.*
 import wylaga.view.display.tickables.primitives.IntervalTickable
 import wylaga.view.sprites.Sprite
 
-class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit) {
+class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit, private val getMuzzleFlash: (Weapon) -> Displayable) {
     private val imageLoader = ImageLoader(decodeBase64)
 
     fun makeEnemy(enemy: Ship) : Sprite {
@@ -127,9 +128,11 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Pair(engine, tickable)
     }
 
-    private fun makeStandardWeapon(ship: Ship, x: Double, y: Double, base: Displayable, firing: Displayable) : Pair<Displayable, Tickable> {
+    private fun makeStandardWeapon(ship: Ship, x: Double, y: Double, base: Displayable, initialFiring: Displayable) : Pair<Displayable, Tickable> {
         val weapon = TranslatedDisplayable(x, y, base)
         val tickable = DelegateTickable()
+
+        var firing = initialFiring
 
         ship.subscribeFire {
             weapon.target = firing
@@ -137,6 +140,10 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
                 weapon.target = base
                 tickable.delegate = NullTickable.instance
             }
+        }
+
+        ship.subscribeWeaponChange {
+            firing = getMuzzleFlash(it)
         }
 
         return Pair(weapon, tickable)
@@ -180,11 +187,23 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         return Pair(chassis, chassisAnimation)
     }
 
+    fun makeOrangeMuzzleFlash() = imageLoader.playerFiringOrangeWeapon
+    fun makeYellowMuzzleFlash() = imageLoader.playerFiringYellowWeapon
+    fun makeGreenMuzzleFlash() = imageLoader.playerFiringGreenWeapon
+    fun makeCyanMuzzleFlash() = imageLoader.playerFiringCyanWeapon
+    fun makeMagentaMuzzleFlash() = imageLoader.playerFiringMagentaWeapon
+
     fun makeRedPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)
+    fun makeOrangePlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.orangePlayerProjectile, onExpire, Color.ORANGE, 70, 50.0)
+    fun makeYellowPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.yellowPlayerProjectile, onExpire, Color.YELLOW, 70, 50.0)
+    fun makeGreenPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.greenPlayerProjectile, onExpire, Color.GREEN, 70, 50.0)
+    fun makeCyanPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.cyanPlayerProjectile, onExpire, Color.CYAN, 70, 50.0)
+    fun makeMagentaPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.magentaPlayerProjectile, onExpire, Color.MAGENTA, 70, 50.0)
 
     fun makeGreenSquareProjectile(projectile: Entity) = Sprite(projectile, imageLoader.greenSquareProjectile, onExpire, Color.GREEN, 70, 50.0)
 
     fun makeHealingPickup(pickup: Entity) = Sprite(pickup, imageLoader.healthPickup, onExpire, Color.CYAN, 50,  45.0)
     fun makeEnergyPickup(pickup: Entity) = Sprite(pickup, imageLoader.energyPickup, onExpire, Color.YELLOW, 50, 45.0)
     fun makePointsPickup(pickup: Entity) = Sprite(pickup, imageLoader.pointsPickup, onExpire, Color.YELLOW, 50, 45.0)
+    fun makeWeaponUpgradePickup(pickup: Entity) = Sprite(pickup, imageLoader.weaponUpgradePickup, onExpire, Color.MAGENTA, 100, 75.0)
 }

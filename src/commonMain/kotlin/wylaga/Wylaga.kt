@@ -60,33 +60,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         model.subscribeFriendlyShipDespawn { playerScore -= it.points }
         model.subscribeHostileShipDespawn { playerScore += it.points }
 
-        val pickupFactory =
-            PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) },
-                { playerScore += it })
-        val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite)
 
-        model.subscribeHostileShipDespawn {
-            if(Random.nextDouble() <= 1) {
-                val roll = Random.nextDouble()
-                when {
-                    roll <= 0.33 -> {
-                        val pickup = pickupFactory.makeHealing(it.x + (it.width / 2), it.y + (it.height / 2))
-                        view.setSprite(pickup, spriteFactory.makeHealingPickup(pickup))
-                        model.spawnPickup(pickup)
-                    }
-                    roll <= 0.67 -> {
-                        val pickup = pickupFactory.makeEnergy(it.x + (it.width / 2), it.y + (it.height / 2))
-                        view.setSprite(pickup, spriteFactory.makeEnergyPickup(pickup))
-                        model.spawnPickup(pickup)
-                    }
-                    else -> {
-                        val pickup = pickupFactory.makePoints(it.x + (it.width / 2), it.y + (it.height / 2))
-                        view.setSprite(pickup, spriteFactory.makePointsPickup(pickup))
-                        model.spawnPickup(pickup)
-                    }
-                }
-            }
-        }
+        val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite, view::getMuzzleFlash)
 
         val friendlyWeaponFactory = WeaponFactory { projectile, cause ->
             model.despawnFriendlyProjectile(
@@ -109,6 +84,58 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.setSprite(player, spriteFactory.makePlayer(player))
         view.setSpriteMaker(playerWeapon, spriteFactory::makeRedPlayerProjectile)
         model.spawnPlayerShip(player)
+
+        val orangePlayerWeapon = friendlyWeaponFactory.makePlayerWeapon(14.0)
+        view.setMuzzleFlash(orangePlayerWeapon, spriteFactory.makeOrangeMuzzleFlash())
+        view.setSpriteMaker(orangePlayerWeapon, spriteFactory::makeOrangePlayerProjectile)
+
+        val yellowPlayerWeapon = friendlyWeaponFactory.makePlayerWeapon(18.0)
+        view.setMuzzleFlash(yellowPlayerWeapon, spriteFactory.makeYellowMuzzleFlash())
+        view.setSpriteMaker(yellowPlayerWeapon, spriteFactory::makeYellowPlayerProjectile)
+
+        val greenPlayerWeapon = friendlyWeaponFactory.makePlayerWeapon(22.0)
+        view.setMuzzleFlash(greenPlayerWeapon, spriteFactory.makeGreenMuzzleFlash())
+        view.setSpriteMaker(greenPlayerWeapon, spriteFactory::makeGreenPlayerProjectile)
+
+        val cyanPlayerWeapon = friendlyWeaponFactory.makePlayerWeapon(26.0)
+        view.setMuzzleFlash(cyanPlayerWeapon, spriteFactory.makeCyanMuzzleFlash())
+        view.setSpriteMaker(cyanPlayerWeapon, spriteFactory::makeCyanPlayerProjectile)
+
+        val magentaPlayerWeapon = friendlyWeaponFactory.makePlayerWeapon(30.0)
+        view.setMuzzleFlash(magentaPlayerWeapon, spriteFactory.makeMagentaMuzzleFlash())
+        view.setSpriteMaker(magentaPlayerWeapon, spriteFactory::makeMagentaPlayerProjectile)
+
+        val playerWeaponUpgrades = arrayOf(orangePlayerWeapon, yellowPlayerWeapon, greenPlayerWeapon, cyanPlayerWeapon, magentaPlayerWeapon)
+
+        val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades)
+
+        model.subscribeHostileShipDespawn {
+            if(Random.nextDouble() <= 1) {
+                val roll = Random.nextDouble()
+                when {
+                    roll <= 0.1 -> {
+                        val pickup = pickupFactory.makeHealing(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makeHealingPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.2 -> {
+                        val pickup = pickupFactory.makeEnergy(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makeEnergyPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.8 -> {
+                        val pickup = pickupFactory.makeWeaponUpgrade(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makeWeaponUpgradePickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    else -> {
+                        val pickup = pickupFactory.makePoints(it.x + (it.width / 2), it.y + (it.height / 2))
+                        view.setSprite(pickup, spriteFactory.makePointsPickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                }
+            }
+        }
 
         val controllerFactory = ControllerFactory()
         this.controller = controllerFactory.makeCombatController(playerPilot)
