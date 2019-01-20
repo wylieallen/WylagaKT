@@ -108,23 +108,23 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
             val prev = wingmanMap[ship]
             if(prev != null)
             {
-                prev.first.damage(prev.first.maxHealth)
-                prev.second.damage(prev.second.maxHealth)
+                prev.first.heal(prev.first.maxHealth)
+                prev.second.heal(prev.second.maxHealth)
+            } else {
+                val leftWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
+                view.setSpriteMaker(leftWeapon, spriteFactory::makeRedWingmanProjectile)
+                val left = friendlyShipFactory.makeWingman(ship.x - 25, ship.y + 50, leftWeapon, MirrorPilot(ship, 5))
+                view.setSprite(left, spriteFactory.makeWingman(left))
+
+                val rightWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
+                view.setSpriteMaker(rightWeapon, spriteFactory::makeRedWingmanProjectile)
+                val right = friendlyShipFactory.makeWingman(ship.x + 50, ship.y + 50, rightWeapon, MirrorPilot(ship, 5))
+                view.setSprite(right, spriteFactory.makeWingman(right))
+
+                wingmanMap[ship] = Pair(left, right)
+                model.spawnFriendlyShip(left)
+                model.spawnFriendlyShip(right)
             }
-
-            val leftWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
-            view.setSpriteMaker(leftWeapon, spriteFactory::makeRedWingmanProjectile)
-            val left = friendlyShipFactory.makeWingman(ship.x - 25, ship.y + 50, leftWeapon, MirrorPilot(ship, 5))
-            view.setSprite(left, spriteFactory.makeWingman(left))
-
-            val rightWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
-            view.setSpriteMaker(rightWeapon, spriteFactory::makeRedWingmanProjectile)
-            val right = friendlyShipFactory.makeWingman(ship.x + 50, ship.y + 50, rightWeapon, MirrorPilot(ship, 5))
-            view.setSprite(right, spriteFactory.makeWingman(right))
-
-            wingmanMap[ship] = Pair(left, right)
-            model.spawnFriendlyShip(left)
-            model.spawnFriendlyShip(right)
         }
 
         fun spawnSuperWingmen(ship: Ship) {
