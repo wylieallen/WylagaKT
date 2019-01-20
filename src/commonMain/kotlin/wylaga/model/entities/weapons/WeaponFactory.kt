@@ -17,4 +17,8 @@ class WeaponFactory(private val onProjectileDisable: (Projectile, Cause) -> Unit
     fun makeEnemyWeapon(damage: Double) : Weapon {
         return SimpleWeapon(7.0, 7.0, 9.0, {projectile, ship -> onImpact(projectile, ship, damage) }, onProjectileDisable)
     }
+
+    fun makeWingmanWeapon(damage: Double) : Weapon {
+        return SimpleWeapon(1.0, 10.0, 8.0, {projectile, ship -> onImpact(projectile, ship, damage) }, onProjectileDisable)
+    }
 }

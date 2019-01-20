@@ -1,13 +1,13 @@
 package wylaga.view
 
 import wylaga.model.entities.Entity
-import wylaga.model.entities.pickups.Pickup
 import wylaga.model.entities.ships.Ship
 import wylaga.model.entities.weapons.Weapon
 import wylaga.view.display.Color
 import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
+import wylaga.view.display.displayables.primitives.SolidRect
 import wylaga.view.display.image.Base64Encoding
 import wylaga.view.display.tickables.*
 import wylaga.view.display.tickables.primitives.IntervalTickable
@@ -15,6 +15,15 @@ import wylaga.view.sprites.Sprite
 
 class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val onExpire: (Sprite) -> Unit, private val getMuzzleFlash: (Weapon) -> Displayable) {
     private val imageLoader = ImageLoader(decodeBase64)
+
+    fun makeWingman(wingman: Ship) : Sprite {
+        val chassis = makeStandardShipChassis(wingman, 0.0, 0.0, imageLoader.wingmanBaseChassis, imageLoader.wingmanHurtChassis, imageLoader.wingmanDireChassis, imageLoader.wingmanHealChassis)
+        val special = makeStandardShipSpecial(wingman, 5.0, 15.0, imageLoader.wingmanBaseSpecial, imageLoader.wingmanBoostSpecial)
+        val weapon = makeStandardWeapon(wingman, 10.0, 0.0, imageLoader.wingmanBaseWeapon, imageLoader.wingmanFiringWeapon)
+        val engine = makeStandardEngine(wingman, 5.0, 20.0, imageLoader.wingmanBaseEngine1, imageLoader.wingmanBaseEngine2, imageLoader.wingmanBrakeEngine, imageLoader.wingmanBoostEngine1, imageLoader.wingmanBoostEngine2)
+        return Sprite(wingman, CompositeDisplayable(chassis.first, special.first, weapon.first, engine.first), onExpire, Color.MAGENTA, 100, 80.0,
+            CompositeTickable(chassis.second, special.second, weapon.second, engine.second))
+    }
 
     fun makeEnemy(enemy: Ship) : Sprite {
         val chassis = makeStandardShipChassis(enemy, 0.0, 0.0, imageLoader.enemyBaseChassis, imageLoader.enemyHurtChassis, imageLoader.enemyDireChassis, imageLoader.enemyHealChassis)
@@ -41,7 +50,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
         val weapon = makePlayerWeapon(player)
         val engine = makePlayerEngine(player)
 
-        return Sprite(player, CompositeDisplayable(chassis.first, special.first, weapon.first, engine.first), onExpire, Color.MAGENTA, 70, 60.0,
+        return Sprite(player, CompositeDisplayable(chassis.first, special.first, weapon.first, engine.first), onExpire, Color.MAGENTA, 140, 100.0,
             CompositeTickable(chassis.second, special.second, weapon.second, engine.second))
     }
 
@@ -193,6 +202,7 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makeCyanMuzzleFlash() = imageLoader.playerFiringCyanWeapon
     fun makeMagentaMuzzleFlash() = imageLoader.playerFiringMagentaWeapon
 
+    fun makeRedWingmanProjectile(projectile: Entity) = Sprite(projectile, SolidRect(projectile.width, projectile.height, Color.RED), onExpire, Color.RED, 50, 40.0)
     fun makeRedPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)
     fun makeOrangePlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.orangePlayerProjectile, onExpire, Color.ORANGE, 70, 50.0)
     fun makeYellowPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.yellowPlayerProjectile, onExpire, Color.YELLOW, 70, 50.0)
@@ -208,4 +218,5 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makePointsPickup(pickup: Entity) = Sprite(pickup, imageLoader.pointsPickup, onExpire, Color.YELLOW, 50, 45.0)
     fun makeWeaponUpgradePickup(pickup: Entity) = Sprite(pickup, imageLoader.weaponUpgradePickup, onExpire, Color.MAGENTA, 100, 75.0)
     fun makeHealthUpgradePickup(pickup: Entity) = Sprite(pickup, imageLoader.healthUpgradePickup, onExpire, Color.CYAN, 100, 75.0)
+    fun makeWingmenPickup(pickup: Entity) = Sprite(pickup, imageLoader.wingmenPickup, onExpire, Color.ORANGE, 100, 60.0)
 }

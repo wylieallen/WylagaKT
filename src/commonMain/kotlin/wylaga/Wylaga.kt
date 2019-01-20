@@ -14,6 +14,8 @@ import wylaga.model.entities.ships.ShipFactory
 import wylaga.model.entities.weapons.WeaponFactory
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pilots.ControlBufferPilot
+import wylaga.model.entities.pilots.MirrorPilot
+import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.expiration.Cause
 import wylaga.stages.StageFactory
 import wylaga.stages.StageIterator
@@ -63,19 +65,12 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite, view::getMuzzleFlash)
 
-        val friendlyWeaponFactory = WeaponFactory { projectile, cause ->
-            model.despawnFriendlyProjectile(
-                projectile,
-                cause
-            )
-        }
-        val playerShipFactory = ShipFactory(
-            onDeath = { model.despawnPlayerShip(it) },
-            spawnProjectile = model::spawnFriendlyProjectile,
-            orientation = Entity.Orientation.NORTH
-        )
+        val friendlyWeaponFactory = WeaponFactory { projectile, cause -> model.despawnFriendlyProjectile(projectile, cause) }
 
-        //initializeLifecycleDiagnosticWidget()
+        val playerShipFactory = ShipFactory(onDeath = { model.despawnPlayerShip(it) }, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
+        val friendlyShipFactory = ShipFactory({model.despawnFriendlyShip(it)}, model::spawnFriendlyProjectile, Entity.Orientation.NORTH)
+
+        initializeLifecycleDiagnosticWidget()
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()
@@ -107,7 +102,36 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val playerWeaponUpgrades = arrayOf(orangePlayerWeapon, yellowPlayerWeapon, greenPlayerWeapon, cyanPlayerWeapon, magentaPlayerWeapon)
 
-        val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades)
+        val wingmanMap = mutableMapOf<Ship, Pair<Ship, Ship>>()
+
+        fun spawnWingmen(ship: Ship) {
+            val prev = wingmanMap[ship]
+            if(prev != null)
+            {
+                prev.first.damage(prev.first.maxHealth)
+                prev.second.damage(prev.second.maxHealth)
+            }
+
+            val leftWeapon = friendlyWeaponFactory.makeWingmanWeapon(10.0)
+            view.setSpriteMaker(leftWeapon, spriteFactory::makeRedWingmanProjectile)
+            val left = friendlyShipFactory.makeWingman(ship.x - 25, ship.y + 50, leftWeapon, MirrorPilot(ship, 5))
+            view.setSprite(left, spriteFactory.makeWingman(left))
+
+            val rightWeapon = friendlyWeaponFactory.makeWingmanWeapon(10.0)
+            view.setSpriteMaker(rightWeapon, spriteFactory::makeRedWingmanProjectile)
+            val right = friendlyShipFactory.makeWingman(ship.x + 50, ship.y + 50, rightWeapon, MirrorPilot(ship, 5))
+            view.setSprite(right, spriteFactory.makeWingman(right))
+
+            wingmanMap[ship] = Pair(left, right)
+            model.spawnFriendlyShip(left)
+            model.spawnFriendlyShip(right)
+        }
+
+        model.subscribeFriendlyShipDespawn { wingmanMap.remove(it) }
+        model.subscribePlayerShipDespawn { wingmanMap.remove(it) }
+        model.subscribeHostileShipDespawn { wingmanMap.remove(it) }
+
+        val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades, ::spawnWingmen)
 
         model.subscribeHostileShipDespawn {
             if(Random.nextDouble() <= 1) {
@@ -133,6 +157,11 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
                     roll <= 0.3 -> {
                         val pickup = pickupFactory.makeHealthUpgrade(x, y)
                         view.setSprite(pickup, spriteFactory.makeHealthUpgradePickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.7 -> {
+                        val pickup = pickupFactory.makeWingmen(x, y)
+                        view.setSprite(pickup, spriteFactory.makeWingmenPickup(pickup))
                         model.spawnPickup(pickup)
                     }
                     roll <= 0.8 -> {

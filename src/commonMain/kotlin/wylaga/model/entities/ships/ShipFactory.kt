@@ -21,4 +21,8 @@ class ShipFactory(private val onDeath: (Ship) -> Unit, private val spawnProjecti
     fun makeEvilPlayer(x: Double, y: Double, weapon: Weapon, pilot: Pilot) : Ship {
         return Ship(x, y, 50.0, 50.0, 3.0, orientation, 250.0, 1000, onDeath, 25.0, 2.0, pilot, spawnProjectile, weapon)
     }
+
+    fun makeWingman(x: Double, y: Double, weapon: Weapon, pilot: Pilot) : Ship {
+        return Ship(x, y, 25.0, 25.0, 3.0, orientation, 60.0, 25, onDeath, 12.5, 2.0, pilot, spawnProjectile, weapon)
+    }
 }
