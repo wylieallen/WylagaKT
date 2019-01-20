@@ -15,6 +15,7 @@ import wylaga.model.entities.weapons.WeaponFactory
 import wylaga.model.entities.Entity
 import wylaga.model.entities.pilots.ControlBufferPilot
 import wylaga.model.entities.pilots.MirrorPilot
+import wylaga.model.entities.pilots.RandomPilot
 import wylaga.model.entities.ships.Ship
 import wylaga.model.systems.expiration.Cause
 import wylaga.stages.StageFactory
@@ -153,9 +154,28 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
             spawnWingmen(right)
         }
 
-        model.subscribeFriendlyShipDespawn { wingmanMap.remove(it) }
-        model.subscribePlayerShipDespawn { wingmanMap.remove(it) }
-        model.subscribeHostileShipDespawn { wingmanMap.remove(it) }
+        val friendlyRandomPilot = RandomPilot(0.01, 0.02, 0.01, minY = 450.0, maxY = 850.0)
+        val hostileRandomPilot = RandomPilot(0.01, 0.02, 0.01)
+
+        fun handleFriendlyLeaderDespawn(leader: Ship) {
+            val wingmen = wingmanMap.remove(leader)
+            if(wingmen != null) {
+                wingmen.first.activePilot = friendlyRandomPilot
+                wingmen.second.activePilot = friendlyRandomPilot
+            }
+        }
+
+        fun handleHostileLeaderDespawn(leader: Ship) {
+            val wingmen = wingmanMap.remove(leader)
+            if(wingmen != null) {
+                wingmen.first.activePilot = hostileRandomPilot
+                wingmen.second.activePilot = hostileRandomPilot
+            }
+        }
+
+        model.subscribeFriendlyShipDespawn(::handleFriendlyLeaderDespawn)
+        model.subscribePlayerShipDespawn(::handleFriendlyLeaderDespawn)
+        model.subscribeHostileShipDespawn(::handleHostileLeaderDespawn)
 
         val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades, ::spawnWingmen, ::spawnSuperWingmen)
 
@@ -218,7 +238,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
         val hostileWeaponFactory = WeaponFactory { projectile, cause -> model.despawnHostileProjectile(projectile, cause) }
         val hostileShipFactory = ShipFactory(onDeath = { model.despawnHostileShip(it) }, spawnProjectile = model::spawnHostileProjectile, orientation = Entity.Orientation.SOUTH)
-        stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory), this::loadAndStartNextStage)
+        stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory, wingmanMap), this::loadAndStartNextStage)
 
         loadAndStartNextStage()
     }

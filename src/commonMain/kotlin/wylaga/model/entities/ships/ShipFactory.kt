@@ -7,7 +7,7 @@ import wylaga.model.entities.weapons.Weapon
 
 class ShipFactory(private val onDeath: (Ship) -> Unit, private val spawnProjectile: (Projectile, Any) -> Unit, private val orientation: Entity.Orientation) {
     fun makeEnemy(x: Double = 256.0, y: Double = 256.0, weapon: Weapon, pilot: Pilot) : Ship {
-        return Ship(x, y, 50.0, 50.0, 1.0, orientation, 80.0, 50, onDeath, 25.0, 2.0, pilot, spawnProjectile, weapon)
+        return Ship(x, y, 50.0, 50.0, 1.5, orientation, 80.0, 50, onDeath, 25.0, 2.0, pilot, spawnProjectile, weapon)
     }
 
     fun makeHardpointedPlayer(x: Double = 512.0, y: Double = 256.0, weapon: Weapon, pilot: Pilot) : Ship {
@@ -19,7 +19,7 @@ class ShipFactory(private val onDeath: (Ship) -> Unit, private val spawnProjecti
     }
 
     fun makeEvilPlayer(x: Double, y: Double, weapon: Weapon, pilot: Pilot) : Ship {
-        return Ship(x, y, 50.0, 50.0, 3.0, orientation, 250.0, 1000, onDeath, 25.0, 2.0, pilot, spawnProjectile, weapon)
+        return Ship(x, y, 50.0, 50.0, 3.0, orientation, 500.0, 1000, onDeath, 25.0, 2.0, pilot, spawnProjectile, weapon)
     }
 
     fun makeWingman(x: Double, y: Double, weapon: Weapon, pilot: Pilot) : Ship {
