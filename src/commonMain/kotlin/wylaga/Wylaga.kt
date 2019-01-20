@@ -70,7 +70,7 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         val playerShipFactory = ShipFactory(onDeath = { model.despawnPlayerShip(it) }, spawnProjectile = model::spawnFriendlyProjectile, orientation = Entity.Orientation.NORTH)
         val friendlyShipFactory = ShipFactory({model.despawnFriendlyShip(it)}, model::spawnFriendlyProjectile, Entity.Orientation.NORTH)
 
-        initializeLifecycleDiagnosticWidget()
+        //initializeLifecycleDiagnosticWidget()
 
         // Initialize player and controller:
         val playerPilot = ControlBufferPilot()
@@ -112,12 +112,12 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
                 prev.second.damage(prev.second.maxHealth)
             }
 
-            val leftWeapon = friendlyWeaponFactory.makeWingmanWeapon(10.0)
+            val leftWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
             view.setSpriteMaker(leftWeapon, spriteFactory::makeRedWingmanProjectile)
             val left = friendlyShipFactory.makeWingman(ship.x - 25, ship.y + 50, leftWeapon, MirrorPilot(ship, 5))
             view.setSprite(left, spriteFactory.makeWingman(left))
 
-            val rightWeapon = friendlyWeaponFactory.makeWingmanWeapon(10.0)
+            val rightWeapon = friendlyWeaponFactory.makeWingmanWeapon(8.0)
             view.setSpriteMaker(rightWeapon, spriteFactory::makeRedWingmanProjectile)
             val right = friendlyShipFactory.makeWingman(ship.x + 50, ship.y + 50, rightWeapon, MirrorPilot(ship, 5))
             view.setSprite(right, spriteFactory.makeWingman(right))
@@ -127,11 +127,37 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
             model.spawnFriendlyShip(right)
         }
 
+        fun spawnSuperWingmen(ship: Ship) {
+            val prev = wingmanMap[ship]
+            if(prev != null)
+            {
+                prev.first.damage(prev.first.maxHealth)
+                prev.second.damage(prev.second.maxHealth)
+            }
+
+            val leftWeapon = friendlyWeaponFactory.makePlayerWeapon(10.0)
+            view.setSpriteMaker(leftWeapon, spriteFactory::makeRedPlayerProjectile)
+            val left = friendlyShipFactory.makeHardpointedPlayer(ship.x - 60, ship.y + 50, leftWeapon, MirrorPilot(ship, 5))
+            view.setSprite(left, spriteFactory.makePlayer(left))
+
+            val rightWeapon = friendlyWeaponFactory.makePlayerWeapon(10.0)
+            view.setSpriteMaker(rightWeapon, spriteFactory::makeRedPlayerProjectile)
+            val right = friendlyShipFactory.makeHardpointedPlayer(ship.x + 60, ship.y + 50, rightWeapon, MirrorPilot(ship, 5))
+            view.setSprite(right, spriteFactory.makePlayer(right))
+
+            wingmanMap[ship] = Pair(left, right)
+            model.spawnFriendlyShip(left)
+            model.spawnFriendlyShip(right)
+
+            spawnWingmen(left)
+            spawnWingmen(right)
+        }
+
         model.subscribeFriendlyShipDespawn { wingmanMap.remove(it) }
         model.subscribePlayerShipDespawn { wingmanMap.remove(it) }
         model.subscribeHostileShipDespawn { wingmanMap.remove(it) }
 
-        val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades, ::spawnWingmen)
+        val pickupFactory = PickupFactory({ pickup, cause -> model.despawnPickup(pickup, cause) }, { playerScore += it }, playerWeaponUpgrades, ::spawnWingmen, ::spawnSuperWingmen)
 
         model.subscribeHostileShipDespawn {
             if(Random.nextDouble() <= 1) {
@@ -157,6 +183,11 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
                     roll <= 0.3 -> {
                         val pickup = pickupFactory.makeHealthUpgrade(x, y)
                         view.setSprite(pickup, spriteFactory.makeHealthUpgradePickup(pickup))
+                        model.spawnPickup(pickup)
+                    }
+                    roll <= 0.6 -> {
+                        val pickup = pickupFactory.makeSuperWingmen(x, y)
+                        view.setSprite(pickup, spriteFactory.makeSuperWingmenPickup(pickup))
                         model.spawnPickup(pickup)
                     }
                     roll <= 0.7 -> {
@@ -185,17 +216,8 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
         view.addToHud(TranslatedDisplayable(40.0, 60.0, StringDisplayable({"ENERGY: " + player.energy.toInt() + "/" + player.maxEnergy.toInt()}, "arial", 16, Color.WHITE)))
         view.addToHud(TranslatedDisplayable(40.0, 80.0, StringDisplayable({"POINTS: $playerScore"}, "arial", 16, Color.WHITE)))
 
-        val hostileWeaponFactory = WeaponFactory { projectile, cause ->
-            model.despawnHostileProjectile(
-                projectile,
-                cause
-            )
-        }
-        val hostileShipFactory = ShipFactory(
-            onDeath = { model.despawnHostileShip(it) },
-            spawnProjectile = model::spawnHostileProjectile,
-            orientation = Entity.Orientation.SOUTH
-        )
+        val hostileWeaponFactory = WeaponFactory { projectile, cause -> model.despawnHostileProjectile(projectile, cause) }
+        val hostileShipFactory = ShipFactory(onDeath = { model.despawnHostileShip(it) }, spawnProjectile = model::spawnHostileProjectile, orientation = Entity.Orientation.SOUTH)
         stageIterator = StageIterator(StageFactory(hostileWeaponFactory, hostileShipFactory, spriteFactory), this::loadAndStartNextStage)
 
         loadAndStartNextStage()

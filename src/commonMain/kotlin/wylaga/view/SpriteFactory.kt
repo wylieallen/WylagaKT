@@ -219,4 +219,5 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makeWeaponUpgradePickup(pickup: Entity) = Sprite(pickup, imageLoader.weaponUpgradePickup, onExpire, Color.MAGENTA, 100, 75.0)
     fun makeHealthUpgradePickup(pickup: Entity) = Sprite(pickup, imageLoader.healthUpgradePickup, onExpire, Color.CYAN, 100, 75.0)
     fun makeWingmenPickup(pickup: Entity) = Sprite(pickup, imageLoader.wingmenPickup, onExpire, Color.ORANGE, 100, 60.0)
+    fun makeSuperWingmenPickup(pickup: Entity) = Sprite(pickup, imageLoader.superWingmenPickup, onExpire, Color.ORANGE, 200, 100.0)
 }
