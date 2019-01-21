@@ -90,7 +90,7 @@ class StageFactory(private val weaponFactory: WeaponFactory, private val shipFac
 
     private fun makeNemesis(x: Double, y: Double) : Pair<Pair<Ship, Sprite>, Pair<Weapon, (Entity) -> Sprite>> {
         val weapon = weaponFactory.makePlayerWeapon(50.0)
-        val nemesis = shipFactory.makeEvilPlayer(x, y - 300, weapon = weapon, pilot = makeRallyPilot(x, y))
+        val nemesis = shipFactory.makeEvilPlayer(x, y - 300, weapon = weapon, pilot = makeRallyPilot(x, y, 0.08))
         return Pair(Pair(nemesis, spriteFactory.makePlayer(nemesis)), Pair(weapon, spriteFactory::makeRedPlayerProjectile))
     }
 
@@ -135,6 +135,6 @@ class StageFactory(private val weaponFactory: WeaponFactory, private val shipFac
         return Pair(Pair(enemy, spriteFactory.makeEnemy(enemy)), Pair(weapon, spriteFactory::makeGreenSquareProjectile))
     }
 
-    private fun makeRallyPilot(x: Double, y: Double) = RallyPilot(x, y) { it.activePilot = RandomPilot(0.01, 0.02, 0.01) }
+    private fun makeRallyPilot(x: Double, y: Double, fireChance: Double = 0.02) = RallyPilot(x, y) { it.activePilot = RandomPilot(0.01, fireChance, 0.01) }
     private fun makeMirrorPilot(leader: Ship) = MirrorPilot(leader, 4)
 }

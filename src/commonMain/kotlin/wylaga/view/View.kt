@@ -8,8 +8,8 @@ import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
 import wylaga.view.display.displayables.primitives.NullDisplayable
 import wylaga.view.display.displayables.primitives.SolidRect
-import wylaga.view.display.tickables.CompositeTickable
 import wylaga.view.display.tickables.Tickable
+import wylaga.view.display.tickables.composites.CompositeTickable
 import wylaga.view.sprites.Sprite
 
 class View : Displayable, Tickable {
@@ -47,6 +47,9 @@ class View : Displayable, Tickable {
     fun addTickable(tickable: Tickable) = tickables.add(tickable)
     fun addToBackground(displayable: Displayable) = background.add(displayable)
     fun addToHud(displayable: Displayable) = hud.add(displayable)
+
+    fun removeTickable(tickable: Tickable) = tickables.remove(tickable)
+    fun removeFromBackground(displayable: Displayable) = background.remove(displayable)
 
     fun spawnChildSprite(entity: Entity, source: Any) = addSprite(makeChildSprite(entity, source))
     private fun makeChildSprite(entity: Entity, source: Any): Sprite {

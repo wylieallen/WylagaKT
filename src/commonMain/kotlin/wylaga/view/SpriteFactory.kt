@@ -10,6 +10,7 @@ import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.displayables.primitives.SolidRect
 import wylaga.view.display.image.Base64Encoding
 import wylaga.view.display.tickables.*
+import wylaga.view.display.tickables.composites.CompositeTickable
 import wylaga.view.display.tickables.primitives.IntervalTickable
 import wylaga.view.sprites.Sprite
 
@@ -201,6 +202,8 @@ class SpriteFactory(decodeBase64: (Base64Encoding) -> Displayable, private val o
     fun makeGreenMuzzleFlash() = imageLoader.playerFiringGreenWeapon
     fun makeCyanMuzzleFlash() = imageLoader.playerFiringCyanWeapon
     fun makeMagentaMuzzleFlash() = imageLoader.playerFiringMagentaWeapon
+
+    fun makeWylagaLogo() = imageLoader.wylagaLogo
 
     fun makeRedWingmanProjectile(projectile: Entity) = Sprite(projectile, SolidRect(projectile.width, projectile.height, Color.RED), onExpire, Color.RED, 50, 40.0)
     fun makeRedPlayerProjectile(projectile: Entity) = Sprite(projectile, imageLoader.redPlayerProjectile, onExpire, Color.RED, 70, 50.0)

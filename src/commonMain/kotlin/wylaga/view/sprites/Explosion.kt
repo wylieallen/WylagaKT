@@ -7,8 +7,8 @@ import wylaga.view.display.displayables.Displayable
 import wylaga.view.display.displayables.composites.CompositeDisplayable
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.displayables.primitives.SolidRect
-import wylaga.view.display.tickables.CompositeTickable
 import wylaga.view.display.tickables.Tickable
+import wylaga.view.display.tickables.composites.CompositeTickable
 import kotlin.random.Random
 
 class Explosion(x: Double, y: Double, radius: Double, particleCount: Int, particleColor: Color, private val onExpire: (Explosion) -> Unit) : Displayable,

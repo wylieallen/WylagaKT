@@ -21,6 +21,7 @@ import wylaga.model.systems.expiration.Cause
 import wylaga.stages.StageFactory
 import wylaga.stages.StageIterator
 import wylaga.view.SpriteFactory
+import wylaga.view.backgrounds.ScrollingLogo
 import wylaga.view.backgrounds.Starfield
 import wylaga.view.display.displayables.decorators.TranslatedDisplayable
 import wylaga.view.display.displayables.primitives.StringDisplayable
@@ -65,6 +66,10 @@ class Wylaga(decodeBase64: (Base64Encoding) -> Displayable) : Displayable, Ticka
 
 
         val spriteFactory = SpriteFactory(decodeBase64, view::despawnSprite, view::getMuzzleFlash)
+
+        val scrollingLogo = ScrollingLogo(800.0 - 141, 450.0 - 47,  spriteFactory.makeWylagaLogo() ,-231.0) { view.removeTickable(it); view.removeFromBackground(it); }
+        view.addToBackground(scrollingLogo)
+        view.addTickable(scrollingLogo)
 
         val friendlyWeaponFactory = WeaponFactory { projectile, cause -> model.despawnFriendlyProjectile(projectile, cause) }
 
