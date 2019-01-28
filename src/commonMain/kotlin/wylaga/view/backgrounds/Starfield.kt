@@ -42,8 +42,9 @@ class Starfield(private val width: Double, private val height: Double, starCount
             val composite = CompositeDisplayable()
             displayable = TranslatedDisplayable(x, y, composite)
 
+            val size = 1.0 + Random.nextInt(2)
             for(i in 1..starCount) {
-                composite.add(Star(Random.nextDouble(width), Random.nextDouble(height), 1.0 + Random.nextInt(2), Color(Random.nextInt(0xFF), Random.nextInt(0xFF), Random.nextInt(0xFF))))
+                composite.add(makeStar(size))
             }
         }
 
@@ -55,11 +56,11 @@ class Starfield(private val width: Double, private val height: Double, starCount
                 displayable.y = -height
             }
         }
-    }
 
-    private class Star(x: Double, y: Double, size: Double, color: Color) : Displayable {
-        private val displayable = TranslatedDisplayable(x, y, SolidRect(size, size, color))
-
-        override fun display(p: Painter) = displayable.display(p)
+        private fun makeStar(size: Double) : Displayable {
+            return TranslatedDisplayable(Random.nextDouble(width), Random.nextDouble(height),
+                SolidRect(size, size, Color(Random.nextInt(0xFF), Random.nextInt(0xFF), Random.nextInt(0xFF)))
+            )
+        }
     }
 }
